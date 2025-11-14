@@ -13,14 +13,14 @@ interface SignalsDashboardProps {
 
 export function SignalsDashboard({ signals, assets, onExecuteSignal }: SignalsDashboardProps) {
   const sortedSignals = [...signals].sort((a, b) => b.confidence - a.confidence)
-  const highConfidenceSignals = sortedSignals.filter(s => s.confidence >= 85 && s.action !== 'hold')
+  const highConfidenceSignals = sortedSignals.filter(s => s.confidence >= 70 && s.action !== 'hold')
 
   return (
     <div className="space-y-4">
       <div>
         <h3 className="text-lg font-semibold">Active Trading Signals</h3>
         <p className="text-sm text-muted-foreground">
-          AI-generated signals with {'>'}=85% confidence
+          AI-generated signals with {'>'}=70% confidence
         </p>
       </div>
 
