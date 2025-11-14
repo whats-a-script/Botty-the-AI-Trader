@@ -221,7 +221,7 @@ function App() {
         try {
           const unifiedDecision = await getUnifiedAgentDecision(asset, enabledAgents, portfolio)
           
-          if (unifiedDecision.signal.confidence >= 80 && 
+          if (unifiedDecision.signal.confidence >= 70 && 
               unifiedDecision.signal.action !== 'hold' &&
               unifiedDecision.executionRecommendation === 'execute') {
             newSignals.push(unifiedDecision.signal)
@@ -273,7 +273,7 @@ function App() {
           const unifiedDecision = await getUnifiedAgentDecision(asset, enabledAgents, portfolio)
           
           if (unifiedDecision.executionRecommendation === 'execute' && 
-              unifiedDecision.signal.confidence >= 85 &&
+              unifiedDecision.signal.confidence >= 70 &&
               (unifiedDecision.signal.action === 'buy' || unifiedDecision.signal.action === 'sell')) {
             
             const quantity = unifiedDecision.signal.suggestedQuantity
