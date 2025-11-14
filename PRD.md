@@ -48,11 +48,11 @@ An AI-powered trading simulator that helps users learn trading strategies throug
 - **Success criteria**: Shows all trades with accurate P&L calculations
 
 ### Market Simulator
-- **Functionality**: Fetches live cryptocurrency prices from Coinbase API for Bitcoin, Ethereum, Solana, and Dogecoin
-- **Purpose**: Creates real-world trading environment with actual market data
+- **Functionality**: Fetches live cryptocurrency prices from Coinbase API for the top 30 cryptocurrencies by market cap
+- **Purpose**: Creates comprehensive real-world trading environment with actual market data across diverse crypto assets
 - **Trigger**: Initial page load and automatic updates every 30 seconds
-- **Progression**: Load app → Fetch Coinbase spot prices → Initialize price history → Update prices every 30s → Reflect changes in portfolio
-- **Success criteria**: Prices display within 3 seconds, update smoothly, show real market movements
+- **Progression**: Load app → Fetch Coinbase spot prices for 30 tokens → Initialize price history → Update prices every 30s → Reflect changes in portfolio
+- **Success criteria**: Prices display within 5 seconds, update smoothly, show real market movements across all 30 assets
 
 ## Edge Case Handling
 
@@ -148,6 +148,7 @@ Animations should feel precise and purposeful like a professional trading termin
 - **Mobile**:
   - Stack navigation tabs vertically on mobile
   - Reduce chart height on small screens
-  - Single column layout for asset cards
+  - Single column layout for asset cards with scrollable container
+  - 3-column grid on large screens to accommodate 30 tokens efficiently
   - Bottom sheet for trade forms on mobile
   - Simplified table view with key columns only

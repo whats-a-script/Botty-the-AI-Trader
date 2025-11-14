@@ -32,16 +32,172 @@ export const COINBASE_ASSETS = [
     currencyPair: 'ETH-USD'
   },
   {
+    id: 'USDT',
+    symbol: 'USDT',
+    name: 'Tether',
+    currencyPair: 'USDT-USD'
+  },
+  {
+    id: 'BNB',
+    symbol: 'BNB',
+    name: 'BNB',
+    currencyPair: 'BNB-USD'
+  },
+  {
     id: 'SOL',
     symbol: 'SOL',
     name: 'Solana',
     currencyPair: 'SOL-USD'
   },
   {
+    id: 'USDC',
+    symbol: 'USDC',
+    name: 'USD Coin',
+    currencyPair: 'USDC-USD'
+  },
+  {
+    id: 'XRP',
+    symbol: 'XRP',
+    name: 'XRP',
+    currencyPair: 'XRP-USD'
+  },
+  {
+    id: 'ADA',
+    symbol: 'ADA',
+    name: 'Cardano',
+    currencyPair: 'ADA-USD'
+  },
+  {
+    id: 'AVAX',
+    symbol: 'AVAX',
+    name: 'Avalanche',
+    currencyPair: 'AVAX-USD'
+  },
+  {
     id: 'DOGE',
     symbol: 'DOGE',
     name: 'Dogecoin',
     currencyPair: 'DOGE-USD'
+  },
+  {
+    id: 'DOT',
+    symbol: 'DOT',
+    name: 'Polkadot',
+    currencyPair: 'DOT-USD'
+  },
+  {
+    id: 'MATIC',
+    symbol: 'MATIC',
+    name: 'Polygon',
+    currencyPair: 'MATIC-USD'
+  },
+  {
+    id: 'LINK',
+    symbol: 'LINK',
+    name: 'Chainlink',
+    currencyPair: 'LINK-USD'
+  },
+  {
+    id: 'UNI',
+    symbol: 'UNI',
+    name: 'Uniswap',
+    currencyPair: 'UNI-USD'
+  },
+  {
+    id: 'LTC',
+    symbol: 'LTC',
+    name: 'Litecoin',
+    currencyPair: 'LTC-USD'
+  },
+  {
+    id: 'ATOM',
+    symbol: 'ATOM',
+    name: 'Cosmos',
+    currencyPair: 'ATOM-USD'
+  },
+  {
+    id: 'SHIB',
+    symbol: 'SHIB',
+    name: 'Shiba Inu',
+    currencyPair: 'SHIB-USD'
+  },
+  {
+    id: 'XLM',
+    symbol: 'XLM',
+    name: 'Stellar',
+    currencyPair: 'XLM-USD'
+  },
+  {
+    id: 'ALGO',
+    symbol: 'ALGO',
+    name: 'Algorand',
+    currencyPair: 'ALGO-USD'
+  },
+  {
+    id: 'FIL',
+    symbol: 'FIL',
+    name: 'Filecoin',
+    currencyPair: 'FIL-USD'
+  },
+  {
+    id: 'AAVE',
+    symbol: 'AAVE',
+    name: 'Aave',
+    currencyPair: 'AAVE-USD'
+  },
+  {
+    id: 'NEAR',
+    symbol: 'NEAR',
+    name: 'NEAR Protocol',
+    currencyPair: 'NEAR-USD'
+  },
+  {
+    id: 'APT',
+    symbol: 'APT',
+    name: 'Aptos',
+    currencyPair: 'APT-USD'
+  },
+  {
+    id: 'OP',
+    symbol: 'OP',
+    name: 'Optimism',
+    currencyPair: 'OP-USD'
+  },
+  {
+    id: 'ARB',
+    symbol: 'ARB',
+    name: 'Arbitrum',
+    currencyPair: 'ARB-USD'
+  },
+  {
+    id: 'MKR',
+    symbol: 'MKR',
+    name: 'Maker',
+    currencyPair: 'MKR-USD'
+  },
+  {
+    id: 'GRT',
+    symbol: 'GRT',
+    name: 'The Graph',
+    currencyPair: 'GRT-USD'
+  },
+  {
+    id: 'SNX',
+    symbol: 'SNX',
+    name: 'Synthetix',
+    currencyPair: 'SNX-USD'
+  },
+  {
+    id: 'CRV',
+    symbol: 'CRV',
+    name: 'Curve DAO',
+    currencyPair: 'CRV-USD'
+  },
+  {
+    id: 'SAND',
+    symbol: 'SAND',
+    name: 'The Sandbox',
+    currencyPair: 'SAND-USD'
   }
 ]
 
