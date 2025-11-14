@@ -37,7 +37,8 @@ export function AgentManager({
     stopLossPercent: 2,
     takeProfitPercent: 4,
     riskRewardRatio: 2,
-    volatilityThreshold: 5
+    volatilityThreshold: 5,
+    canCommunicate: true
   })
 
   const handleCreateAgent = () => {
@@ -54,7 +55,8 @@ export function AgentManager({
       stopLossPercent: newAgent.stopLossPercent || 2,
       takeProfitPercent: newAgent.takeProfitPercent || 4,
       riskRewardRatio: newAgent.riskRewardRatio || 2,
-      volatilityThreshold: newAgent.volatilityThreshold || 5
+      volatilityThreshold: newAgent.volatilityThreshold || 5,
+      canCommunicate: newAgent.canCommunicate ?? true
     }
     
     onAgentCreate(agent)
@@ -69,7 +71,8 @@ export function AgentManager({
       stopLossPercent: 2,
       takeProfitPercent: 4,
       riskRewardRatio: 2,
-      volatilityThreshold: 5
+      volatilityThreshold: 5,
+      canCommunicate: true
     })
   }
 
@@ -201,6 +204,15 @@ export function AgentManager({
                   step={0.5}
                 />
               </div>
+
+              <div className="flex items-center space-x-2">
+                <Switch
+                  id="can-communicate"
+                  checked={newAgent.canCommunicate ?? true}
+                  onCheckedChange={(canCommunicate) => setNewAgent({ ...newAgent, canCommunicate })}
+                />
+                <Label htmlFor="can-communicate">Enable Agent Communication</Label>
+              </div>
             </div>
 
             <DialogFooter>
@@ -276,6 +288,12 @@ export function AgentManager({
                   <div className="flex justify-between text-xs text-muted-foreground">
                     <span>SL / TP</span>
                     <span>{agent.stopLossPercent}% / {agent.takeProfitPercent}%</span>
+                  </div>
+                  <div className="flex justify-between text-xs text-muted-foreground">
+                    <span>Communication</span>
+                    <Badge variant={agent.canCommunicate ? 'default' : 'secondary'} className="text-xs">
+                      {agent.canCommunicate ? 'Enabled' : 'Disabled'}
+                    </Badge>
                   </div>
                 </div>
 

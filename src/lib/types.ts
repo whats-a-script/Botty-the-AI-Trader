@@ -90,6 +90,36 @@ export interface AgentConfig {
   takeProfitPercent: number
   riskRewardRatio: number
   volatilityThreshold: number
+  canCommunicate: boolean
+}
+
+export interface AgentMessage {
+  id: string
+  fromAgentId: string
+  fromAgentName: string
+  toAgentId?: string
+  messageType: 'broadcast' | 'direct' | 'consensus'
+  content: string
+  signal?: TradingSignal
+  timestamp: number
+  responses?: AgentMessageResponse[]
+}
+
+export interface AgentMessageResponse {
+  agentId: string
+  agentName: string
+  response: string
+  agreement: 'agree' | 'disagree' | 'neutral'
+  timestamp: number
+}
+
+export interface CustomTradingPair {
+  id: string
+  symbol: string
+  name: string
+  currencyPair: string
+  enabled: boolean
+  addedAt: number
 }
 
 export interface AgentPerformance {

@@ -13,11 +13,25 @@ An advanced AI-powered autonomous trading simulator with multiple intelligent ag
 ## Essential Features
 
 ### Multi-Agent AI Trading System
-- **Functionality**: Create and manage multiple independent AI trading agents, each with unique models (GPT-4o, GPT-4o-mini, DeepSeek, Qwen), trading modes (conservative/moderate/aggressive), and risk parameters
-- **Purpose**: Enable comparison of different AI models and strategies, allowing users to discover which approaches work best in various market conditions
+- **Functionality**: Create and manage multiple independent AI trading agents, each with unique models (GPT-4o, GPT-4o-mini, DeepSeek, Qwen), trading modes (conservative/moderate/aggressive), risk parameters, and inter-agent communication capabilities
+- **Purpose**: Enable comparison of different AI models and strategies, allowing users to discover which approaches work best in various market conditions through agent collaboration and consensus building
 - **Trigger**: User creates agent via agent manager interface
-- **Progression**: Configure agent parameters → Select AI model and trading mode → Set leverage and risk limits → Enable agent → Agent analyzes markets → Generates trading signals with 85%+ confidence → Executes trades automatically or presents for approval
-- **Success criteria**: Agent generates signals within 30 seconds, maintains confidence threshold above 85%, adapts strategy based on performance
+- **Progression**: Configure agent parameters → Select AI model and trading mode → Enable agent communication → Set leverage and risk limits → Enable agent → Agent analyzes markets → Communicates with other agents → Generates trading signals with 85%+ confidence → Executes trades automatically or presents for approval
+- **Success criteria**: Agent generates signals within 30 seconds, maintains confidence threshold above 85%, adapts strategy based on performance, successfully communicates with other agents
+
+### Agent Communication & Consensus Building
+- **Functionality**: AI agents can discuss trading opportunities with each other, share analysis, debate strategies, and reach consensus before executing trades
+- **Purpose**: Demonstrate multi-agent collaboration and collective intelligence, reducing individual bias and improving decision quality
+- **Trigger**: User initiates discussion in Communication tab or agent identifies opportunity
+- **Progression**: Agent A proposes trade → Broadcasts to other agents → Each agent analyzes and responds with agreement/disagreement → System synthesizes consensus → Displays full conversation → Executes if consensus reached
+- **Success criteria**: Agents exchange messages within 10 seconds, responses show unique perspectives, consensus summary reflects group sentiment, full conversation logged
+
+### Custom Trading Pairs
+- **Functionality**: Users can add custom cryptocurrency pairs from Coinbase beyond the default 30, enabling tracking and trading of emerging coins like meme coins or new listings
+- **Purpose**: Give users flexibility to trade their preferred assets and test strategies on different market segments
+- **Trigger**: User clicks "Add Pair" in Custom Pairs tab
+- **Progression**: Enter symbol (e.g., PEPE) → Enter full name → Enter Coinbase pair format (PEPE-USD) → System validates pair exists → Fetches live price → Adds to asset list → Enables for trading
+- **Success criteria**: Custom pairs validate before adding, fetch real Coinbase prices, integrate seamlessly with existing trading system, persist across sessions
 
 ### Autonomous Position Management
 - **Functionality**: AI agents automatically open/close long and short positions with configurable leverage (1-10x), dynamically set stop-loss and take-profit levels based on volatility and risk/reward ratios
@@ -159,6 +173,8 @@ Animations should feel precise and responsive like a professional trading termin
   
 - **Icon Selection**:
   - Robot: AI agents and autonomous features
+  - Chats: Agent communication and discussions
+  - Coin: Custom trading pairs and asset management
   - Lightning: Signal generation and quick actions
   - Shield: Risk management and protection features
   - TrendUp/Down: Market direction, long/short positions, buy/sell
@@ -167,6 +183,10 @@ Animations should feel precise and responsive like a professional trading termin
   - BookOpen: Trade journal and documentation
   - Warning: Risk alerts and drawdown notifications
   - CheckCircle: Successful operations and confirmations
+  - ThumbsUp/Down: Agent agreement/disagreement in discussions
+  - ArrowRight: Message flow and communication paths
+  - Plus: Add new agents, pairs, or positions
+  - Trash: Delete agents, pairs, or positions
   - Clock: Trade history and timestamps
   - Spinner: Loading and processing states
   

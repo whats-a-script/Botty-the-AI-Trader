@@ -6,8 +6,8 @@ import { Toaster } from '@/components/ui/sonner'
 import { toast } from 'sonner'
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
-import { Asset, Portfolio, AgentConfig, TradingSignal, AgentPerformance } from '@/lib/types'
-import { initializeCoinbaseAssets, fetchCoinbasePrices, COINBASE_ASSETS, updatePriceWithRealData } from '@/lib/coinbase-api'
+import { Asset, Portfolio, AgentConfig, TradingSignal, AgentPerformance, AgentMessage, CustomTradingPair } from '@/lib/types'
+import { initializeCoinbaseAssets, fetchCoinbasePrices, COINBASE_ASSETS, updatePriceWithRealData, fetchCoinbasePrice } from '@/lib/coinbase-api'
 import { calculatePortfolioValue, executeTrade, updatePositionPrices } from '@/lib/trading'
 import { PortfolioSummary } from '@/components/PortfolioSummary'
 import { AssetCard } from '@/components/AssetCard'
@@ -20,8 +20,10 @@ import { AgentManager } from '@/components/AgentManager'
 import { SignalsDashboard } from '@/components/SignalsDashboard'
 import { RiskManagement } from '@/components/RiskManagement'
 import { TradeJournal } from '@/components/TradeJournal'
+import { AgentCommunication } from '@/components/AgentCommunication'
+import { CustomPairs } from '@/components/CustomPairs'
 import { generateTradingSignal, checkStopLossAndTakeProfit, adjustStrategyBasedOnPerformance } from '@/lib/ai-agents'
-import { ChartLine, Wallet, Clock, ArrowsClockwise, Spinner, User as UserIcon, Robot, Shield, BookOpen, Lightning } from '@phosphor-icons/react'
+import { ChartLine, Wallet, Clock, ArrowsClockwise, Spinner, User as UserIcon, Robot, Shield, BookOpen, Lightning, Chats, Coin } from '@phosphor-icons/react'
 
 const STARTING_BALANCE = 10000
 
@@ -57,6 +59,14 @@ function App() {
   const [signals, setSignals] = useState<TradingSignal[]>([])
   const [isGeneratingSignals, setIsGeneratingSignals] = useState(false)
   const [autoTradeEnabled, setAutoTradeEnabled] = useState(false)
+  
+  const [messagesRaw, setMessagesRaw] = useKV<AgentMessage[]>('agent-messages', [])
+  const messages = messagesRaw || []
+  const setMessages = setMessagesRaw
+  
+  const [customPairsRaw, setCustomPairsRaw] = useKV<CustomTradingPair[]>('custom-pairs', [])
+  const customPairs = customPairsRaw || []
+  const setCustomPairs = setCustomPairsRaw
 
   useEffect(() => {
     async function loadUserInfo() {
@@ -80,7 +90,25 @@ function App() {
       try {
         setIsLoadingAssets(true)
         const coinbaseAssets = await initializeCoinbaseAssets()
-        setAssets(coinbaseAssets)
+        
+        const customAssets: Asset[] = []
+        for (const pair of customPairs.filter(p => p.enabled)) {
+          try {
+            const price = await fetchCoinbasePrice(pair.currencyPair)
+            customAssets.push({
+              id: pair.id,
+              symbol: pair.symbol,
+              name: pair.name,
+              currentPrice: price,
+              priceHistory: [{timestamp: Date.now(), price}],
+              volatility: 0.03
+            })
+          } catch (error) {
+            console.error(`Failed to load custom pair ${pair.symbol}:`, error)
+          }
+        }
+        
+        setAssets([...coinbaseAssets, ...customAssets])
         toast.success('Live Coinbase data loaded')
       } catch (error) {
         console.error('Error loading Coinbase data:', error)
@@ -91,7 +119,7 @@ function App() {
     }
     
     loadCoinbaseData()
-  }, [])
+  }, [customPairs])
 
   useEffect(() => {
     if (assets.length === 0) return
@@ -266,6 +294,24 @@ function App() {
     toast.info('Agent deleted')
   }
 
+  const handleNewMessage = (message: AgentMessage) => {
+    setMessages((current) => [...(current || []), message])
+  }
+
+  const handleAddCustomPair = (pair: CustomTradingPair) => {
+    setCustomPairs((current) => [...(current || []), pair])
+  }
+
+  const handleToggleCustomPair = (pairId: string, enabled: boolean) => {
+    setCustomPairs((current) => 
+      (current || []).map(p => p.id === pairId ? { ...p, enabled } : p)
+    )
+  }
+
+  const handleRemoveCustomPair = (pairId: string) => {
+    setCustomPairs((current) => (current || []).filter(p => p.id !== pairId))
+  }
+
   return (
     <div className="min-h-screen bg-background">
       <Toaster />
@@ -363,10 +409,18 @@ function App() {
             )}
 
             <Tabs defaultValue="agents" className="space-y-6">
-              <TabsList className="grid w-full grid-cols-6 lg:w-auto lg:inline-grid">
+              <TabsList className="grid w-full grid-cols-4 md:grid-cols-8 lg:w-auto lg:inline-grid">
                 <TabsTrigger value="agents" className="flex items-center gap-2">
                   <Robot size={16} />
                   <span className="hidden sm:inline">Agents</span>
+                </TabsTrigger>
+                <TabsTrigger value="communication" className="flex items-center gap-2">
+                  <Chats size={16} />
+                  <span className="hidden sm:inline">Chat</span>
+                </TabsTrigger>
+                <TabsTrigger value="pairs" className="flex items-center gap-2">
+                  <Coin size={16} />
+                  <span className="hidden sm:inline">Pairs</span>
                 </TabsTrigger>
                 <TabsTrigger value="signals" className="flex items-center gap-2">
                   <Lightning size={16} />
@@ -397,6 +451,25 @@ function App() {
                   onAgentCreate={handleAgentCreate}
                   onAgentUpdate={handleAgentUpdate}
                   onAgentDelete={handleAgentDelete}
+                />
+              </TabsContent>
+
+              <TabsContent value="communication">
+                <AgentCommunication 
+                  agents={agents}
+                  assets={assets}
+                  portfolio={portfolio}
+                  messages={messages}
+                  onNewMessage={handleNewMessage}
+                />
+              </TabsContent>
+
+              <TabsContent value="pairs">
+                <CustomPairs
+                  customPairs={customPairs}
+                  onAddPair={handleAddCustomPair}
+                  onTogglePair={handleToggleCustomPair}
+                  onRemovePair={handleRemoveCustomPair}
                 />
               </TabsContent>
 
