@@ -1,7 +1,7 @@
 import { Asset, Forecast, PricePoint, NewsSentiment, SocialSentiment } from './types'
 
 async function generateNewsSentiment(asset: Asset): Promise<NewsSentiment> {
-  const promptContent = `You are a financial news analyst. Generate a realistic news sentiment analysis for ${asset.name} (${asset.symbol}) cryptocurrency.
+  const prompt = (window.spark.llmPrompt as any)`You are a financial news analyst. Generate a realistic news sentiment analysis for ${asset.name} (${asset.symbol}) cryptocurrency.
 
 Current Price: $${asset.currentPrice.toFixed(4)}
 Recent Price Action: ${calculateReturns(asset.priceHistory.slice(-30)).toFixed(2)}%
@@ -23,7 +23,7 @@ Return valid JSON:
 }`
 
   try {
-    const response = await window.spark.llm(promptContent, 'gpt-4o-mini', true)
+    const response = await window.spark.llm(prompt, 'gpt-4o-mini', true)
     const result = JSON.parse(response)
     return {
       sentiment: result.sentiment || 'neutral',
@@ -45,7 +45,7 @@ Return valid JSON:
 }
 
 async function generateSocialSentiment(asset: Asset): Promise<SocialSentiment> {
-  const promptContent = `You are a social media sentiment analyst. Generate realistic social sentiment analysis for ${asset.name} (${asset.symbol}) cryptocurrency.
+  const prompt = (window.spark.llmPrompt as any)`You are a social media sentiment analyst. Generate realistic social sentiment analysis for ${asset.name} (${asset.symbol}) cryptocurrency.
 
 Current Price: $${asset.currentPrice.toFixed(4)}
 Recent Movement: ${calculateReturns(asset.priceHistory.slice(-10)).toFixed(2)}%
@@ -68,7 +68,7 @@ Return valid JSON:
 }`
 
   try {
-    const response = await window.spark.llm(promptContent, 'gpt-4o-mini', true)
+    const response = await window.spark.llm(prompt, 'gpt-4o-mini', true)
     const result = JSON.parse(response)
     return {
       sentiment: result.sentiment || 'neutral',
@@ -117,7 +117,7 @@ export async function generateForecast(asset: Asset): Promise<Forecast> {
   const distSupportStr = supportResistance.distanceFromSupport.toFixed(2)
   const distResistanceStr = supportResistance.distanceFromResistance.toFixed(2)
   
-  const promptContent = `You are an expert quantitative analyst with deep expertise in technical analysis, news sentiment, and social analytics. Analyze this cryptocurrency asset using comprehensive data.
+  const prompt = (window.spark.llmPrompt as any)`You are an expert quantitative analyst with deep expertise in technical analysis, news sentiment, and social analytics. Analyze this cryptocurrency asset using comprehensive data.
 
 Asset: ${asset.name} (${asset.symbol})
 Current Price: $${currentPriceStr}
@@ -178,7 +178,7 @@ Return valid JSON:
 Be data-driven. High confidence requires strong evidence across ALL factors.`
 
   try {
-    const response = await window.spark.llm(promptContent, 'gpt-4o', true)
+    const response = await window.spark.llm(prompt, 'gpt-4o', true)
     const result = JSON.parse(response)
     
     const predictions = generatePredictionPoints(

@@ -45,7 +45,7 @@ async function generateAgentResponse(
 ): Promise<AgentMessageResponse> {
   const agentSignal = await generateTradingSignal(asset, agent, portfolio)
   
-  const promptContent = `You are ${agent.name}, an AI trading agent reviewing a colleague's analysis.
+  const prompt = (window.spark.llmPrompt as any)`You are ${agent.name}, an AI trading agent reviewing a colleague's analysis.
 
 Original recommendation: ${originalSignal.action} ${asset.symbol} with ${originalSignal.confidence}% confidence.
 Reasoning: ${originalSignal.reasoning}
@@ -61,7 +61,7 @@ Return JSON:
 }`
 
   try {
-    const response = await window.spark.llm(promptContent, 'gpt-4o-mini', true)
+    const response = await window.spark.llm(prompt, 'gpt-4o-mini', true)
     const result = JSON.parse(response)
     
     return {
@@ -96,7 +96,7 @@ async function generateConsensusMessage(
   
   const responsesText = responses.map(r => `- ${r.agentName}: ${r.agreement} - ${r.response}`).join('\n')
   
-  const promptContent = `You are a consensus coordinator for AI trading agents.
+  const prompt = (window.spark.llmPrompt as any)`You are a consensus coordinator for AI trading agents.
 
 Asset: ${asset.symbol}
 Original proposal: ${discussionMessage.signal?.action} with ${discussionMessage.signal?.confidence}% confidence
@@ -109,7 +109,7 @@ Summary: ${agreeCount} agree, ${disagreeCount} disagree, ${responses.length - ag
 Provide a consensus summary (2-3 sentences) that synthesizes the group's perspective.`
 
   try {
-    const consensusContent = await window.spark.llm(promptContent, 'gpt-4o-mini', false)
+    const consensusContent = await window.spark.llm(prompt, 'gpt-4o-mini', false)
     
     return {
       id: `msg-${Date.now()}-consensus`,
