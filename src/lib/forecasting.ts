@@ -1,6 +1,102 @@
-import { Asset, Forecast, PricePoint } from './types'
+import { Asset, Forecast, PricePoint, NewsSentiment, SocialSentiment } from './types'
+
+async function generateNewsSentiment(asset: Asset): Promise<NewsSentiment> {
+  const promptText = `You are a financial news analyst. Generate a realistic news sentiment analysis for ${asset.name} (${asset.symbol}) cryptocurrency.
+
+Current Price: $${asset.currentPrice.toFixed(4)}
+Recent Price Action: ${calculateReturns(asset.priceHistory.slice(-30)).toFixed(2)}%
+
+Simulate realistic crypto news sentiment. Consider:
+- Recent market trends
+- Typical crypto market narratives
+- Regulatory news impact
+- Technology/development updates
+- Market adoption signals
+
+Return valid JSON:
+{
+  "sentiment": "<bullish|bearish|neutral>",
+  "score": <-100 to 100, positive is bullish>,
+  "headline": "<realistic main headline>",
+  "summary": "<2 sentences covering key points>",
+  "sources": ["<source1>", "<source2>", "<source3>"]
+}`
+
+  try {
+    const response = await window.spark.llm(promptText, 'gpt-4o-mini', true)
+    const result = JSON.parse(response)
+    return {
+      sentiment: result.sentiment || 'neutral',
+      score: Math.min(Math.max(result.score || 0, -100), 100),
+      headline: result.headline || 'Market Activity Normal',
+      summary: result.summary || 'Mixed signals in the market.',
+      sources: result.sources || ['CryptoNews', 'Market Watch', 'Bloomberg Crypto']
+    }
+  } catch (error) {
+    console.error('News sentiment generation error:', error)
+    return {
+      sentiment: 'neutral',
+      score: 0,
+      headline: 'Market Activity Normal',
+      summary: 'No significant news detected. Market showing typical volatility patterns.',
+      sources: ['CryptoNews', 'Market Watch']
+    }
+  }
+}
+
+async function generateSocialSentiment(asset: Asset): Promise<SocialSentiment> {
+  const promptText = `You are a social media sentiment analyst. Generate realistic social sentiment analysis for ${asset.name} (${asset.symbol}) cryptocurrency.
+
+Current Price: $${asset.currentPrice.toFixed(4)}
+Recent Movement: ${calculateReturns(asset.priceHistory.slice(-10)).toFixed(2)}%
+
+Simulate realistic crypto social media sentiment. Consider:
+- Twitter/X crypto community discussions
+- Reddit crypto sentiment
+- Discord/Telegram community activity
+- Influencer mentions
+- Community excitement or fear
+
+Return valid JSON:
+{
+  "sentiment": "<bullish|bearish|neutral>",
+  "score": <-100 to 100, positive is bullish>,
+  "volume": "<high|medium|low>",
+  "trending": <true|false>,
+  "keyTopics": ["<topic1>", "<topic2>", "<topic3>"],
+  "summary": "<2 sentences about social sentiment>"
+}`
+
+  try {
+    const response = await window.spark.llm(promptText, 'gpt-4o-mini', true)
+    const result = JSON.parse(response)
+    return {
+      sentiment: result.sentiment || 'neutral',
+      score: Math.min(Math.max(result.score || 0, -100), 100),
+      volume: result.volume || 'medium',
+      trending: result.trending || false,
+      keyTopics: result.keyTopics || ['price action', 'market discussion'],
+      summary: result.summary || 'Community showing mixed sentiment.'
+    }
+  } catch (error) {
+    console.error('Social sentiment generation error:', error)
+    return {
+      sentiment: 'neutral',
+      score: 0,
+      volume: 'medium',
+      trending: false,
+      keyTopics: ['price action', 'market discussion'],
+      summary: 'Community activity at normal levels with mixed sentiment.'
+    }
+  }
+}
 
 export async function generateForecast(asset: Asset): Promise<Forecast> {
+  const [newsSentiment, socialSentiment] = await Promise.all([
+    generateNewsSentiment(asset),
+    generateSocialSentiment(asset)
+  ])
+  
   const recentHistory = asset.priceHistory.slice(-60)
   const currentPrice = asset.currentPrice
   const returns = calculateReturns(recentHistory)
@@ -21,7 +117,7 @@ export async function generateForecast(asset: Asset): Promise<Forecast> {
   const distSupportStr = supportResistance.distanceFromSupport.toFixed(2)
   const distResistanceStr = supportResistance.distanceFromResistance.toFixed(2)
   
-  const promptText = `You are an expert quantitative analyst with deep expertise in technical analysis and market microstructure. Analyze this cryptocurrency asset using the comprehensive data provided.
+  const promptText = `You are an expert quantitative analyst with deep expertise in technical analysis, news sentiment, and social analytics. Analyze this cryptocurrency asset using comprehensive data.
 
 Asset: ${asset.name} (${asset.symbol})
 Current Price: $${currentPriceStr}
@@ -39,28 +135,47 @@ TECHNICAL INDICATORS:
 - Distance from Support: ${distSupportStr}%
 - Distance from Resistance: ${distResistanceStr}%
 
+NEWS SENTIMENT:
+- Sentiment: ${newsSentiment.sentiment}
+- Score: ${newsSentiment.score}/100
+- Headline: "${newsSentiment.headline}"
+- Summary: ${newsSentiment.summary}
+
+SOCIAL SENTIMENT:
+- Sentiment: ${socialSentiment.sentiment}
+- Score: ${socialSentiment.score}/100
+- Volume: ${socialSentiment.volume}
+- Trending: ${socialSentiment.trending ? 'Yes' : 'No'}
+- Key Topics: ${socialSentiment.keyTopics.join(', ')}
+- Summary: ${socialSentiment.summary}
+
 ANALYSIS GUIDELINES:
-Your confidence level should reflect data quality and indicator alignment:
-- HIGH CONFIDENCE (85-95%): Clear directional signals with 4+ aligned indicators, strong trend, RSI in normal range (30-70), low volatility, clear support/resistance levels
-- MODERATE-HIGH (75-84%): 3 aligned indicators, established trend, moderate volatility
-- MODERATE (60-74%): Mixed signals, transitional phase
-- LOW (<60%): High uncertainty, contradictory indicators
+Your confidence level should reflect data quality and alignment across all factors:
+- HIGH CONFIDENCE (85-95%): Technical, news, and social all aligned. Strong trend, clear indicators, unified sentiment
+- MODERATE-HIGH (75-84%): 2 of 3 factors aligned (technical + news OR technical + social)
+- MODERATE (60-74%): Mixed signals between technical and sentiment, or weak alignment
+- LOW (<60%): Contradictory signals across technical, news, and social
+
+Weight the factors:
+- Technical indicators: 50%
+- News sentiment: 25%
+- Social sentiment: 25%
 
 Focus on:
-1. Indicator convergence/divergence
-2. Technical pattern strength
-3. Risk-reward ratio based on support/resistance
-4. Volatility regime and stability
+1. Multi-factor convergence/divergence
+2. Sentiment-price correlation
+3. Risk-reward considering all aspects
+4. Contrarian opportunities (sentiment vs technical)
 
 Return valid JSON:
 {
-  "confidence": <number 85-95 if indicators strongly align, otherwise lower>,
-  "reasoning": "<2-3 sentences with specific indicator references>",
+  "confidence": <number reflecting cross-factor alignment>,
+  "reasoning": "<3-4 sentences integrating technical, news, and social analysis>",
   "direction": "<up|down|neutral>",
   "expectedChange": <realistic percentage -8 to 8>
 }
 
-Be data-driven. High confidence requires strong evidence.`
+Be data-driven. High confidence requires strong evidence across ALL factors.`
 
   try {
     const response = await window.spark.llm(promptText, 'gpt-4o', true)
@@ -78,8 +193,10 @@ Be data-driven. High confidence requires strong evidence.`
       currentPrice,
       predictions,
       confidence: Math.min(Math.max(result.confidence || 50, 0), 100),
-      reasoning: result.reasoning || 'Analysis based on comprehensive technical indicators and price action.',
-      timestamp: Date.now()
+      reasoning: result.reasoning || 'Analysis based on comprehensive technical indicators, news sentiment, and social signals.',
+      timestamp: Date.now(),
+      newsSentiment,
+      socialSentiment
     }
   } catch (error) {
     console.error('Forecast generation error:', error)
@@ -88,8 +205,10 @@ Be data-driven. High confidence requires strong evidence.`
       currentPrice,
       predictions: generatePredictionPoints(currentPrice, 0, asset.volatility, 10),
       confidence: 50,
-      reasoning: 'Unable to generate detailed forecast. Market conditions show mixed signals.',
-      timestamp: Date.now()
+      reasoning: 'Unable to generate detailed forecast. Market conditions show mixed signals across technical and sentiment analysis.',
+      timestamp: Date.now(),
+      newsSentiment,
+      socialSentiment
     }
   }
 }

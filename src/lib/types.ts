@@ -52,6 +52,23 @@ export interface Portfolio {
   totalPnL: number
 }
 
+export interface NewsSentiment {
+  sentiment: 'bullish' | 'bearish' | 'neutral'
+  score: number
+  headline: string
+  summary: string
+  sources: string[]
+}
+
+export interface SocialSentiment {
+  sentiment: 'bullish' | 'bearish' | 'neutral'
+  score: number
+  volume: 'high' | 'medium' | 'low'
+  trending: boolean
+  keyTopics: string[]
+  summary: string
+}
+
 export interface Forecast {
   assetId: string
   currentPrice: number
@@ -59,6 +76,8 @@ export interface Forecast {
   confidence: number
   reasoning: string
   timestamp: number
+  newsSentiment?: NewsSentiment
+  socialSentiment?: SocialSentiment
 }
 
 export type TradingMode = 'conservative' | 'moderate' | 'aggressive'
