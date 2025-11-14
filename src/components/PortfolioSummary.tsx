@@ -17,40 +17,40 @@ export function PortfolioSummary({ portfolio, totalValue }: PortfolioSummaryProp
   const isPositive = totalPnL >= 0
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          <Wallet size={24} />
-          Portfolio Summary
+    <Card className="border-border/50 shadow-sm">
+      <CardHeader className="pb-3">
+        <CardTitle className="flex items-center gap-2 text-sm font-semibold">
+          <Wallet size={16} />
+          Portfolio
         </CardTitle>
       </CardHeader>
-      <CardContent className="space-y-4">
+      <CardContent className="space-y-3">
         <div>
-          <p className="text-sm text-muted-foreground">Total Value</p>
-          <p className="text-3xl font-bold">{formatPrice(totalValue)}</p>
+          <p className="text-xs text-muted-foreground">Total Value</p>
+          <p className="text-2xl font-bold">{formatPrice(totalValue)}</p>
         </div>
 
         <Separator />
 
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-2 gap-3">
           <div>
-            <p className="text-sm text-muted-foreground">Cash</p>
-            <p className="text-xl font-semibold">{formatPrice(portfolio.cash)}</p>
+            <p className="text-xs text-muted-foreground">Cash</p>
+            <p className="text-lg font-semibold">{formatPrice(portfolio.cash)}</p>
           </div>
           <div>
-            <p className="text-sm text-muted-foreground">Positions</p>
-            <p className="text-xl font-semibold">{portfolio.positions.length}</p>
+            <p className="text-xs text-muted-foreground">Positions</p>
+            <p className="text-lg font-semibold">{portfolio.positions.length}</p>
           </div>
         </div>
 
         <Separator />
 
         <div>
-          <p className="text-sm text-muted-foreground">Total P&L</p>
-          <div className={`text-2xl font-bold flex items-center gap-2 ${isPositive ? 'text-success' : 'text-destructive'}`}>
-            {isPositive ? <ArrowUp size={20} /> : <ArrowDown size={20} />}
+          <p className="text-xs text-muted-foreground">Total P&L</p>
+          <div className={`text-xl font-bold flex items-center gap-1.5 ${isPositive ? 'text-success' : 'text-destructive'}`}>
+            {isPositive ? <ArrowUp size={16} /> : <ArrowDown size={16} />}
             {formatPrice(Math.abs(totalPnL))}
-            <span className="text-lg">({(isFinite(totalPnLPercent) ? totalPnLPercent : 0).toFixed(2)}%)</span>
+            <span className="text-sm">({(isFinite(totalPnLPercent) ? totalPnLPercent : 0).toFixed(2)}%)</span>
           </div>
         </div>
       </CardContent>

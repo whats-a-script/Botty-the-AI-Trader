@@ -16,28 +16,28 @@ export function AssetCard({ asset, onClick }: AssetCardProps) {
 
   return (
     <Card 
-      className="cursor-pointer hover:shadow-md transition-shadow"
+      className="cursor-pointer hover:shadow-md transition-all duration-150 system-button border-border/50"
       onClick={onClick}
     >
-      <CardHeader className="pb-3">
+      <CardHeader className="pb-2">
         <div className="flex items-start justify-between">
           <div>
-            <CardTitle className={`text-lg ${isPositive ? 'text-[#39FF14]' : ''}`}>
+            <CardTitle className={`text-sm font-semibold ${isPositive ? 'text-[#39FF14]' : ''}`}>
               {asset.symbol}
             </CardTitle>
-            <p className="text-sm text-muted-foreground mt-1">{asset.name}</p>
+            <p className="text-xs text-muted-foreground mt-0.5">{asset.name}</p>
           </div>
-          <Badge variant={isPositive ? 'default' : 'destructive'} className="flex items-center gap-1">
-            {isPositive ? <TrendUp size={14} /> : <TrendDown size={14} />}
+          <Badge variant={isPositive ? 'default' : 'destructive'} className="flex items-center gap-1 text-xs h-5">
+            {isPositive ? <TrendUp size={12} /> : <TrendDown size={12} />}
             {safeReturns.toFixed(2)}%
           </Badge>
         </div>
       </CardHeader>
-      <CardContent>
-        <div className={`text-2xl font-semibold ${isPositive ? 'text-[#39FF14]' : ''}`}>
+      <CardContent className="pt-2">
+        <div className={`text-lg font-semibold ${isPositive ? 'text-[#39FF14]' : ''}`}>
           {formatPrice(asset.currentPrice)}
         </div>
-        <p className="text-xs text-muted-foreground mt-1">
+        <p className="text-xs text-muted-foreground mt-0.5">
           Vol: {((asset.volatility || 0) * 100).toFixed(1)}%
         </p>
       </CardContent>

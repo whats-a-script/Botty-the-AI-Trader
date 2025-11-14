@@ -399,42 +399,46 @@ function App() {
     <div className="min-h-screen bg-background">
       <Toaster />
       
-      <header className="border-b bg-card sticky top-0 z-50">
-        <div className="container mx-auto px-4 py-4">
+      <header className="system-toolbar sticky top-0 z-50">
+        <div className="container mx-auto px-4 py-3">
           <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-3xl font-bold tracking-tight">AI Trading Simulator</h1>
-              <p className="text-sm text-muted-foreground mt-1">
-                Unified multi-agent AI trading with live Coinbase data
-              </p>
+            <div className="flex items-center gap-3">
+              <div className="flex items-center gap-2">
+                <div className="w-3 h-3 rounded-full bg-destructive/80 hover:bg-destructive transition-colors cursor-pointer"></div>
+                <div className="w-3 h-3 rounded-full bg-[oklch(0.75_0.15_60)] hover:bg-[oklch(0.70_0.15_60)] transition-colors cursor-pointer"></div>
+                <div className="w-3 h-3 rounded-full bg-success/80 hover:bg-success transition-colors cursor-pointer"></div>
+              </div>
+              <div className="ml-2">
+                <h1 className="text-sm font-semibold tracking-tight">AI Trading Simulator</h1>
+                <p className="text-xs text-muted-foreground">
+                  Unified multi-agent AI trading
+                </p>
+              </div>
             </div>
             
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2">
               {!isLoadingUser && userInfo && (
-                <div className="flex items-center gap-3 px-4 py-2 rounded-lg bg-muted/50">
-                  <Avatar className="h-8 w-8">
+                <div className="flex items-center gap-2 px-3 py-1.5 rounded-md bg-secondary/50 border border-border/50">
+                  <Avatar className="h-6 w-6">
                     <AvatarImage src={userInfo.avatarUrl} alt={userInfo.login} />
                     <AvatarFallback>
-                      <UserIcon size={16} />
+                      <UserIcon size={12} />
                     </AvatarFallback>
                   </Avatar>
-                  <div className="hidden sm:block text-sm">
+                  <div className="hidden sm:block text-xs">
                     <div className="font-medium">{userInfo.login}</div>
-                    {userInfo.email && (
-                      <div className="text-xs text-muted-foreground">{userInfo.email}</div>
-                    )}
                   </div>
                 </div>
               )}
               
               <Dialog>
                 <DialogTrigger asChild>
-                  <Button variant="outline" size="sm">
-                    <ArrowsClockwise className="mr-2" size={16} />
+                  <Button variant="outline" size="sm" className="system-button h-7 text-xs">
+                    <ArrowsClockwise className="mr-1.5" size={14} />
                     Reset
                   </Button>
                 </DialogTrigger>
-                <DialogContent>
+                <DialogContent className="system-window">
                   <DialogHeader>
                     <DialogTitle>Reset Portfolio?</DialogTitle>
                     <DialogDescription>
@@ -443,7 +447,7 @@ function App() {
                     </DialogDescription>
                   </DialogHeader>
                   <DialogFooter>
-                    <Button variant="destructive" onClick={handleResetPortfolio}>
+                    <Button variant="destructive" onClick={handleResetPortfolio} className="system-button">
                       Reset Portfolio
                     </Button>
                   </DialogFooter>
@@ -454,82 +458,87 @@ function App() {
         </div>
       </header>
 
-      <main className="container mx-auto px-4 py-8">
+      <main className="container mx-auto px-4 py-6">
         {isLoadingAssets ? (
           <div className="flex items-center justify-center min-h-[400px]">
-            <div className="text-center space-y-4">
-              <Spinner className="w-12 h-12 animate-spin mx-auto text-accent" />
+            <div className="text-center space-y-4 system-window p-8">
+              <Spinner className="w-10 h-10 animate-spin mx-auto text-primary" />
               <div>
-                <p className="text-lg font-medium">Loading live Coinbase data...</p>
-                <p className="text-sm text-muted-foreground">Fetching real-time cryptocurrency prices</p>
+                <p className="text-sm font-medium">Loading live Coinbase data...</p>
+                <p className="text-xs text-muted-foreground">Fetching real-time cryptocurrency prices</p>
               </div>
             </div>
           </div>
         ) : (
           <>
-            <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 mb-8">
+            <div className="grid grid-cols-1 lg:grid-cols-4 gap-4 mb-6">
               <div className="lg:col-span-1">
-                <PortfolioSummary portfolio={portfolio} totalValue={totalValue} />
+                <div className="system-window">
+                  <PortfolioSummary portfolio={portfolio} totalValue={totalValue} />
+                </div>
               </div>
               
               <div className="lg:col-span-3">
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 max-h-[600px] overflow-y-auto pr-2">
-                  {assets.map(asset => (
-                    <AssetCard
-                      key={asset.id}
-                      asset={asset}
-                      onClick={() => setSelectedAsset(asset)}
-                    />
-                  ))}
+                <div className="system-window p-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 max-h-[600px] overflow-y-auto pr-2">
+                    {assets.map(asset => (
+                      <AssetCard
+                        key={asset.id}
+                        asset={asset}
+                        onClick={() => setSelectedAsset(asset)}
+                      />
+                    ))}
+                  </div>
                 </div>
               </div>
             </div>
 
             {selectedAsset && (
-              <div className="mb-8">
+              <div className="mb-6">
                 <AssetDetailCard asset={selectedAsset} onClose={() => setSelectedAsset(null)} />
               </div>
             )}
 
-            <Tabs defaultValue="unified" className="space-y-6">
-              <TabsList className="grid w-full grid-cols-4 md:grid-cols-9 lg:w-auto lg:inline-grid">
-                <TabsTrigger value="unified" className="flex items-center gap-2">
-                  <UsersThree size={16} />
-                  <span className="hidden sm:inline">Unified</span>
-                </TabsTrigger>
-                <TabsTrigger value="agents" className="flex items-center gap-2">
-                  <Robot size={16} />
-                  <span className="hidden sm:inline">Agents</span>
-                </TabsTrigger>
-                <TabsTrigger value="communication" className="flex items-center gap-2">
-                  <Chats size={16} />
-                  <span className="hidden sm:inline">Chat</span>
-                </TabsTrigger>
-                <TabsTrigger value="pairs" className="flex items-center gap-2">
-                  <Coin size={16} />
-                  <span className="hidden sm:inline">Pairs</span>
-                </TabsTrigger>
-                <TabsTrigger value="signals" className="flex items-center gap-2">
-                  <Lightning size={16} />
-                  <span className="hidden sm:inline">Signals</span>
-                </TabsTrigger>
-                <TabsTrigger value="risk" className="flex items-center gap-2">
-                  <Shield size={16} />
-                  <span className="hidden sm:inline">Risk</span>
-                </TabsTrigger>
-                <TabsTrigger value="trade" className="flex items-center gap-2">
-                  <Wallet size={16} />
-                  <span className="hidden sm:inline">Trade</span>
-                </TabsTrigger>
-                <TabsTrigger value="journal" className="flex items-center gap-2">
-                  <BookOpen size={16} />
-                  <span className="hidden sm:inline">Journal</span>
-                </TabsTrigger>
-                <TabsTrigger value="forecast" className="flex items-center gap-2">
-                  <ChartLine size={16} />
-                  <span className="hidden sm:inline">Forecast</span>
-                </TabsTrigger>
-              </TabsList>
+            <div className="system-window p-4">
+              <Tabs defaultValue="unified" className="space-y-4">
+                <TabsList className="grid w-full grid-cols-4 md:grid-cols-9 lg:w-auto lg:inline-grid bg-secondary/30 p-1">
+                  <TabsTrigger value="unified" className="flex items-center gap-1.5 data-[state=active]:bg-card data-[state=active]:shadow-sm text-xs">
+                    <UsersThree size={14} />
+                    <span className="hidden sm:inline">Unified</span>
+                  </TabsTrigger>
+                  <TabsTrigger value="agents" className="flex items-center gap-1.5 data-[state=active]:bg-card data-[state=active]:shadow-sm text-xs">
+                    <Robot size={14} />
+                    <span className="hidden sm:inline">Agents</span>
+                  </TabsTrigger>
+                  <TabsTrigger value="communication" className="flex items-center gap-1.5 data-[state=active]:bg-card data-[state=active]:shadow-sm text-xs">
+                    <Chats size={14} />
+                    <span className="hidden sm:inline">Chat</span>
+                  </TabsTrigger>
+                  <TabsTrigger value="pairs" className="flex items-center gap-1.5 data-[state=active]:bg-card data-[state=active]:shadow-sm text-xs">
+                    <Coin size={14} />
+                    <span className="hidden sm:inline">Pairs</span>
+                  </TabsTrigger>
+                  <TabsTrigger value="signals" className="flex items-center gap-1.5 data-[state=active]:bg-card data-[state=active]:shadow-sm text-xs">
+                    <Lightning size={14} />
+                    <span className="hidden sm:inline">Signals</span>
+                  </TabsTrigger>
+                  <TabsTrigger value="risk" className="flex items-center gap-1.5 data-[state=active]:bg-card data-[state=active]:shadow-sm text-xs">
+                    <Shield size={14} />
+                    <span className="hidden sm:inline">Risk</span>
+                  </TabsTrigger>
+                  <TabsTrigger value="trade" className="flex items-center gap-1.5 data-[state=active]:bg-card data-[state=active]:shadow-sm text-xs">
+                    <Wallet size={14} />
+                    <span className="hidden sm:inline">Trade</span>
+                  </TabsTrigger>
+                  <TabsTrigger value="journal" className="flex items-center gap-1.5 data-[state=active]:bg-card data-[state=active]:shadow-sm text-xs">
+                    <BookOpen size={14} />
+                    <span className="hidden sm:inline">Journal</span>
+                  </TabsTrigger>
+                  <TabsTrigger value="forecast" className="flex items-center gap-1.5 data-[state=active]:bg-card data-[state=active]:shadow-sm text-xs">
+                    <ChartLine size={14} />
+                    <span className="hidden sm:inline">Forecast</span>
+                  </TabsTrigger>
+                </TabsList>
 
               <TabsContent value="unified" className="space-y-6">
                 <UnifiedAgentPanel
@@ -627,7 +636,8 @@ function App() {
               <TabsContent value="forecast">
                 <ForecastPanel assets={assets} />
               </TabsContent>
-            </Tabs>
+              </Tabs>
+            </div>
           </>
         )}
       </main>
@@ -637,13 +647,13 @@ function App() {
 
 function AssetDetailCard({ asset, onClose }: { asset: Asset; onClose: () => void }) {
   return (
-    <div className="bg-card border rounded-lg p-6">
+    <div className="system-window p-6">
       <div className="flex items-start justify-between mb-4">
         <div>
-          <h3 className="text-2xl font-bold">{asset.symbol}</h3>
-          <p className="text-muted-foreground">{asset.name}</p>
+          <h3 className="text-xl font-bold">{asset.symbol}</h3>
+          <p className="text-sm text-muted-foreground">{asset.name}</p>
         </div>
-        <Button variant="ghost" size="sm" onClick={onClose}>
+        <Button variant="ghost" size="sm" onClick={onClose} className="system-button h-8 text-xs">
           Close
         </Button>
       </div>

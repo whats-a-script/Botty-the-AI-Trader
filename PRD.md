@@ -103,50 +103,48 @@ An advanced AI-powered autonomous trading simulator with multiple intelligent ag
 
 ## Design Direction
 
-The design should feel like a professional Bloomberg Terminal or institutional trading platform, with high information density presented through clear data visualization, real-time updates, and a sophisticated dark-on-light interface that emphasizes trust and precision. A rich interface serves the complex functionality, with multiple panels, live metrics, and comprehensive controls while maintaining visual hierarchy and usability.
+The design should feel like a native system application with OS-level styling - clean, minimal, and professional like macOS or Windows native apps. Interface elements should use system-style components with subtle shadows, native-feeling buttons, and a modern glass-effect aesthetic that emphasizes clarity and usability. A compact interface serves the complex functionality with condensed spacing while maintaining visual hierarchy and readability.
 
 ## Color Selection
 
-Custom palette - A professional institutional trading platform aesthetic with emphasis on data clarity, risk awareness, and AI intelligence indicators.
+Custom palette - A clean, native system-style aesthetic with emphasis on clarity, subtle accents, and professional appearance similar to macOS or Windows system applications.
 
-- **Primary Color**: Deep navy blue (oklch(0.25 0.05 250)) communicates trust, stability, and institutional-grade quality
-- **Secondary Colors**: Slate gray (oklch(0.45 0.02 240)) for secondary controls and subtle backgrounds without distraction
-- **Accent Color**: Electric blue (oklch(0.65 0.15 210)) highlights active AI agents, high-confidence signals, and interactive elements
-- **Success (Profit/Long)**: Vibrant green (oklch(0.55 0.15 145)) for positive P&L, buy signals, and long positions
-- **Destructive (Loss/Short)**: Warning red (oklch(0.55 0.20 25)) for losses, sell signals, short positions, and risk alerts
-- **Warning (Risk)**: Amber yellow (oklch(0.65 0.15 60)) for drawdown warnings and volatility alerts
+- **Primary Color**: System blue (oklch(0.52 0.14 252)) communicates interactivity and calls-to-action like native OS buttons
+- **Secondary Colors**: Light gray (oklch(0.93 0.005 264)) for subtle backgrounds and inactive elements
+- **Accent Color**: System blue (oklch(0.52 0.14 252)) highlights active elements and important interactions
+- **Success (Profit/Long)**: System green (oklch(0.55 0.15 145)) for positive P&L, buy signals, and long positions
+- **Destructive (Loss/Short)**: System red (oklch(0.58 0.20 25)) for losses, sell signals, short positions, and destructive actions
 - **Foreground/Background Pairings**:
-  - Background (Soft white oklch(0.98 0 0)): Dark navy text (oklch(0.2 0.05 250)) - Ratio 11.2:1 ✓
-  - Card (Pure white oklch(1 0 0)): Navy text (oklch(0.25 0.05 250)) - Ratio 9.8:1 ✓
-  - Primary (Deep navy oklch(0.25 0.05 250)): White text (oklch(1 0 0)) - Ratio 9.8:1 ✓
-  - Accent (Electric blue oklch(0.65 0.15 210)): White text (oklch(1 0 0)) - Ratio 4.6:1 ✓
+  - Background (Light gray oklch(0.95 0.002 264)): Dark text (oklch(0.15 0.01 264)) - Ratio 13.5:1 ✓
+  - Card (Off-white oklch(0.99 0.001 264)): Dark text (oklch(0.15 0.01 264)) - Ratio 14.8:1 ✓
+  - Primary (System blue oklch(0.52 0.14 252)): White text (oklch(0.99 0 0)) - Ratio 6.2:1 ✓
+  - Accent (System blue oklch(0.52 0.14 252)): White text (oklch(0.99 0 0)) - Ratio 6.2:1 ✓
   - Success (Green oklch(0.55 0.15 145)): White text (oklch(1 0 0)) - Ratio 4.8:1 ✓
-  - Destructive (Red oklch(0.55 0.20 25)): White text (oklch(1 0 0)) - Ratio 4.9:1 ✓
-  - Warning (Amber oklch(0.65 0.15 60)): Black text (oklch(0.2 0 0)) - Ratio 5.2:1 ✓
+  - Destructive (Red oklch(0.58 0.20 25)): White text (oklch(1 0 0)) - Ratio 5.1:1 ✓
 
 ## Font Selection
 
-Typography should convey precision, technical sophistication, and clarity at high information density, using Inter for its exceptional tabular number rendering and professional appearance in data-heavy interfaces.
+Typography should convey clarity and readability using native system fonts for maximum familiarity and performance, with the standard system font stack (-apple-system, BlinkMacSystemFont, Segoe UI, Roboto) that adapts to each operating system.
 
 - **Typographic Hierarchy**:
-  - H1 (Page Title): Inter Bold/32px/tight letter spacing (-0.02em)/leading-none
-  - H2 (Section Headers): Inter Semibold/24px/tight letter spacing (-0.01em)/leading-tight  
-  - H3 (Panel Headers): Inter Semibold/18px/normal spacing/leading-snug
-  - Body (Primary Content): Inter Regular/15px/normal spacing/leading-relaxed (1.6)
-  - Small (Metadata/Labels): Inter Medium/13px/wide letter spacing (0.01em)/leading-normal
-  - Tiny (Fine Print): Inter Regular/11px/normal spacing/leading-tight
-  - Mono/Numbers (Prices/Metrics): Inter Regular/15px with font-feature-settings 'tnum', 'lnum' for perfect tabular alignment
+  - H1 (Page Title): System font Semibold/14px/tight letter spacing/leading-tight
+  - H2 (Section Headers): System font Semibold/16px/normal spacing/leading-snug  
+  - H3 (Panel Headers): System font Semibold/14px/normal spacing/leading-snug
+  - Body (Primary Content): System font Regular/13px/normal spacing/leading-normal (1.5)
+  - Small (Metadata/Labels): System font Medium/12px/normal spacing/leading-normal
+  - Tiny (Fine Print): System font Regular/11px/normal spacing/leading-tight
+  - Mono/Numbers (Prices/Metrics): System font Regular/13px with font-feature-settings 'tnum', 'lnum' for tabular alignment
 
 ## Animations
 
-Animations should feel precise and responsive like a professional trading terminal, with quick state transitions and data updates that confirm actions without distracting from rapid decision-making.
+Animations should feel snappy and responsive like native system applications, with quick state transitions that confirm actions without delays or elaborate motion.
 
-- **Purposeful Meaning**: Subtle animations emphasize critical events - trade execution confirmation (scale), P&L changes (number countup), signal arrival (gentle pulse), risk alerts (attention shake)
+- **Purposeful Meaning**: Minimal animations emphasize interactions - button press (scale), hover states (subtle brightness), and state changes (quick fade) that match native OS behavior
 - **Hierarchy of Movement**: 
-  - Critical: Trade execution confirmations (200ms bounce), stop-loss triggers (immediate scale + color), new high-confidence signals (pulse)
-  - Secondary: Price updates (number transitions 150ms), chart data updates (smooth path morphing)
-  - Subtle: Button hovers (100ms brightness), tab switches (200ms slide), card interactions (150ms lift)
-  - Continuous: Real-time metrics (smooth countup), loading states (confident spinner)
+  - Critical: Button presses (150ms scale 0.98), modal appearances (200ms fade)
+  - Secondary: Price updates (quick number transitions), tab switches (150ms fade)
+  - Subtle: Button hovers (100ms brightness), card hovers (150ms shadow increase)
+  - Continuous: Loading states (smooth spinner), real-time metrics (instant updates)
 
 ## Component Selection
 
@@ -198,10 +196,10 @@ Animations should feel precise and responsive like a professional trading termin
   - Spinner: Loading and processing states
   
 - **Spacing**:
-  - Page sections: gap-8 (32px) for major separations
-  - Panel padding: p-6 (24px) for card interiors
-  - Component groups: gap-4 (16px) for related elements
-  - Inline elements: gap-2 (8px) for tight groupings
+  - Page sections: gap-4 to gap-6 (16-24px) for major separations
+  - Panel padding: p-4 (16px) for card interiors
+  - Component groups: gap-3 (12px) for related elements
+  - Inline elements: gap-1.5 to gap-2 (6-8px) for tight groupings
   - Data grids: gap-3 (12px) for metric displays
   
 - **Mobile**:
