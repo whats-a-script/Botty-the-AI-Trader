@@ -68,4 +68,6 @@ export class RateLimiter {
   }
 }
 
-export const llmRateLimiter = new RateLimiter(1000, 3, 2000)
+const llmRateLimiterInstance = new RateLimiter(1000, 3, 2000)
+
+export { llmRateLimiterInstance as llmRateLimiter }
