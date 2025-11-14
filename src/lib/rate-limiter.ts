@@ -67,3 +67,5 @@ export class RateLimiter {
     return this.queue.length
   }
 }
+
+export const llmRateLimiter = new RateLimiter(1000, 3, 2000)
