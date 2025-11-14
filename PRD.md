@@ -1,6 +1,6 @@
 # Planning Guide
 
-An AI-powered trading simulator that helps users learn trading strategies through simulated forecasting and paper trading, providing a safe educational environment to understand market patterns and decision-making.
+An AI-powered trading simulator that helps users learn trading strategies through live Coinbase cryptocurrency data, AI forecasting, and paper trading, providing a safe educational environment to understand market patterns and real-time decision-making.
 
 **Experience Qualities**:
 1. **Educational** - Emphasizes learning and understanding rather than gambling, with clear explanations of forecasting methods and outcomes
@@ -41,11 +41,11 @@ An AI-powered trading simulator that helps users learn trading strategies throug
 - **Success criteria**: Shows all trades with accurate P&L calculations
 
 ### Market Simulator
-- **Functionality**: Simulates realistic price movements for practice assets
-- **Purpose**: Creates dynamic environment for practicing trading
-- **Trigger**: Background process on page load
-- **Progression**: Generate price movements → Apply volatility → Update asset prices → Trigger chart updates
-- **Success criteria**: Prices update smoothly, feel realistic, maintain continuity
+- **Functionality**: Fetches live cryptocurrency prices from Coinbase API for Bitcoin, Ethereum, Solana, and Dogecoin
+- **Purpose**: Creates real-world trading environment with actual market data
+- **Trigger**: Initial page load and automatic updates every 30 seconds
+- **Progression**: Load app → Fetch Coinbase spot prices → Initialize price history → Update prices every 30s → Reflect changes in portfolio
+- **Success criteria**: Prices display within 3 seconds, update smoothly, show real market movements
 
 ## Edge Case Handling
 

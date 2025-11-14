@@ -7,6 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { ArrowUp, ArrowDown } from '@phosphor-icons/react'
 import { Asset, Portfolio } from '@/lib/types'
 import { canExecuteTrade } from '@/lib/trading'
+import { formatPrice } from '@/lib/utils'
 import { toast } from 'sonner'
 
 interface TradeFormProps {
@@ -81,7 +82,7 @@ export function TradeForm({ assets, portfolio, onTrade }: TradeFormProps) {
             <SelectContent>
               {assets.map(asset => (
                 <SelectItem key={asset.id} value={asset.id}>
-                  {asset.symbol} - ${asset.currentPrice.toFixed(2)}
+                  {asset.symbol} - {formatPrice(asset.currentPrice)}
                 </SelectItem>
               ))}
             </SelectContent>
@@ -105,7 +106,7 @@ export function TradeForm({ assets, portfolio, onTrade }: TradeFormProps) {
           <div className="p-3 bg-muted rounded-md">
             <div className="flex justify-between text-sm">
               <span className="text-muted-foreground">Estimated Total:</span>
-              <span className="font-semibold">${estimatedTotal.toFixed(2)}</span>
+              <span className="font-semibold">{formatPrice(estimatedTotal)}</span>
             </div>
           </div>
         )}

@@ -1,6 +1,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Separator } from '@/components/ui/separator'
 import { Portfolio } from '@/lib/types'
+import { formatPrice } from '@/lib/utils'
 import { ArrowUp, ArrowDown, Wallet } from '@phosphor-icons/react'
 
 interface PortfolioSummaryProps {
@@ -24,7 +25,7 @@ export function PortfolioSummary({ portfolio, totalValue }: PortfolioSummaryProp
       <CardContent className="space-y-4">
         <div>
           <p className="text-sm text-muted-foreground">Total Value</p>
-          <p className="text-3xl font-bold">${totalValue.toFixed(2)}</p>
+          <p className="text-3xl font-bold">{formatPrice(totalValue)}</p>
         </div>
 
         <Separator />
@@ -32,7 +33,7 @@ export function PortfolioSummary({ portfolio, totalValue }: PortfolioSummaryProp
         <div className="grid grid-cols-2 gap-4">
           <div>
             <p className="text-sm text-muted-foreground">Cash</p>
-            <p className="text-xl font-semibold">${portfolio.cash.toFixed(2)}</p>
+            <p className="text-xl font-semibold">{formatPrice(portfolio.cash)}</p>
           </div>
           <div>
             <p className="text-sm text-muted-foreground">Positions</p>
@@ -46,7 +47,7 @@ export function PortfolioSummary({ portfolio, totalValue }: PortfolioSummaryProp
           <p className="text-sm text-muted-foreground">Total P&L</p>
           <div className={`text-2xl font-bold flex items-center gap-2 ${isPositive ? 'text-success' : 'text-destructive'}`}>
             {isPositive ? <ArrowUp size={20} /> : <ArrowDown size={20} />}
-            ${Math.abs(totalPnL).toFixed(2)}
+            {formatPrice(Math.abs(totalPnL))}
             <span className="text-lg">({totalPnLPercent.toFixed(2)}%)</span>
           </div>
         </div>

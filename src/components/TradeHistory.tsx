@@ -2,6 +2,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Trade } from '@/lib/types'
+import { formatPrice } from '@/lib/utils'
 import { Clock } from '@phosphor-icons/react'
 
 interface TradeHistoryProps {
@@ -69,9 +70,9 @@ export function TradeHistory({ trades }: TradeHistoryProps) {
                   </TableCell>
                   <TableCell className="font-medium">{trade.symbol}</TableCell>
                   <TableCell className="text-right">{trade.quantity}</TableCell>
-                  <TableCell className="text-right">${trade.price.toFixed(2)}</TableCell>
+                  <TableCell className="text-right">{formatPrice(trade.price)}</TableCell>
                   <TableCell className="text-right font-semibold">
-                    ${trade.total.toFixed(2)}
+                    {formatPrice(trade.total)}
                   </TableCell>
                 </TableRow>
               )

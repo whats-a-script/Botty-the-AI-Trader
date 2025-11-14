@@ -2,6 +2,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Position } from '@/lib/types'
 import { calculatePositionPnL } from '@/lib/trading'
+import { formatPrice } from '@/lib/utils'
 import { TrendUp, TrendDown } from '@phosphor-icons/react'
 
 interface PositionsTableProps {
@@ -51,13 +52,13 @@ export function PositionsTable({ positions }: PositionsTableProps) {
                 <TableRow key={position.assetId}>
                   <TableCell className="font-medium">{position.symbol}</TableCell>
                   <TableCell className="text-right">{position.quantity}</TableCell>
-                  <TableCell className="text-right">${position.avgEntryPrice.toFixed(2)}</TableCell>
-                  <TableCell className="text-right">${position.currentPrice.toFixed(2)}</TableCell>
-                  <TableCell className="text-right">${currentValue.toFixed(2)}</TableCell>
+                  <TableCell className="text-right">{formatPrice(position.avgEntryPrice)}</TableCell>
+                  <TableCell className="text-right">{formatPrice(position.currentPrice)}</TableCell>
+                  <TableCell className="text-right">{formatPrice(currentValue)}</TableCell>
                   <TableCell className={`text-right font-semibold ${isPositive ? 'text-success' : 'text-destructive'}`}>
                     <div className="flex items-center justify-end gap-1">
                       {isPositive ? <TrendUp size={14} /> : <TrendDown size={14} />}
-                      ${Math.abs(pnl).toFixed(2)} ({pnlPercent.toFixed(2)}%)
+                      {formatPrice(Math.abs(pnl))} ({pnlPercent.toFixed(2)}%)
                     </div>
                   </TableCell>
                 </TableRow>

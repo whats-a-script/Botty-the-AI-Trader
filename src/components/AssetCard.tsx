@@ -2,7 +2,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { TrendUp, TrendDown } from '@phosphor-icons/react'
 import { Asset } from '@/lib/types'
-import { calculateReturns } from '@/lib/market-simulator'
+import { calculateReturns, formatPrice } from '@/lib/utils'
 
 interface AssetCardProps {
   asset: Asset
@@ -32,7 +32,7 @@ export function AssetCard({ asset, onClick }: AssetCardProps) {
       </CardHeader>
       <CardContent>
         <div className="text-2xl font-semibold">
-          ${asset.currentPrice.toFixed(2)}
+          {formatPrice(asset.currentPrice)}
         </div>
         <p className="text-xs text-muted-foreground mt-1">
           Vol: {(asset.volatility * 100).toFixed(1)}%
