@@ -13,18 +13,18 @@ An advanced AI-powered autonomous trading simulator with multiple intelligent ag
 ## Essential Features
 
 ### Unified Auto-Trading Mode
-- **Functionality**: One-click toggle to enable fully autonomous trading where all enabled AI agents work together to scan markets, reach consensus, and execute trades automatically every 90 seconds with no human intervention required
+- **Functionality**: One-click toggle to enable fully autonomous trading where all enabled AI agents work together to scan markets, reach consensus, and execute trades automatically every 30 seconds with no human intervention required
 - **Purpose**: Enable true hands-free algorithmic trading simulation where users can observe AI agents making real trading decisions autonomously based on collective intelligence
 - **Trigger**: User toggles auto-trading switch in Unified tab
-- **Progression**: Enable switch → System validates agents are enabled and drawdown <15% → Agents begin scanning top 8 assets every 90 seconds → Each asset analyzed by all agents → Consensus calculated → If consensus ≥70% confidence and unanimous recommendation to execute → Trade executed automatically → User notified → Repeat continuously until disabled or drawdown limit hit
-- **Success criteria**: Auto-trading executes trades without intervention, respects 70% confidence threshold, automatically stops at 15% drawdown, shows real-time status indicators, logs all automated decisions
+- **Progression**: Enable switch → System validates agents are enabled and drawdown <15% → Agents begin scanning top 8 assets every 30 seconds → Each asset analyzed by all agents → Consensus calculated → If consensus ≥60% confidence and unanimous recommendation to execute → Trade executed automatically → User notified → Repeat continuously until disabled or drawdown limit hit
+- **Success criteria**: Auto-trading executes trades without intervention, respects 60% confidence threshold, automatically stops at 15% drawdown, shows real-time status indicators, logs all automated decisions
 
 ### Multi-Agent AI Trading System
 - **Functionality**: Create and manage multiple independent AI trading agents, each with unique models (GPT-4o, GPT-4o-mini, DeepSeek, Qwen), trading modes (conservative/moderate/aggressive), risk parameters, and inter-agent communication capabilities
 - **Purpose**: Enable comparison of different AI models and strategies, allowing users to discover which approaches work best in various market conditions through agent collaboration and consensus building
 - **Trigger**: User creates agent via agent manager interface
-- **Progression**: Configure agent parameters → Select AI model and trading mode → Enable agent communication → Set leverage and risk limits → Enable agent → Agent analyzes markets → Communicates with other agents → Generates trading signals with 70%+ confidence → Executes trades automatically or presents for approval
-- **Success criteria**: Agent generates signals within 30 seconds, maintains confidence threshold above 70%, adapts strategy based on performance, successfully communicates with other agents
+- **Progression**: Configure agent parameters → Select AI model and trading mode → Enable agent communication → Set leverage and risk limits → Enable agent → Agent analyzes markets → Communicates with other agents → Generates trading signals with 60%+ confidence → Executes trades automatically or presents for approval
+- **Success criteria**: Agent generates signals within 30 seconds, maintains confidence threshold above 60%, adapts strategy based on performance, successfully communicates with other agents
 
 ### Agent Communication & Consensus Building
 - **Functionality**: AI agents can discuss trading opportunities with each other, share analysis, debate strategies, and reach consensus before executing trades
@@ -58,7 +58,7 @@ An advanced AI-powered autonomous trading simulator with multiple intelligent ag
 - **Functionality**: Coordinate multiple AI models where each analyzes different aspects (news sentiment, technical indicators, risk management) and results are combined into consensus trading decisions
 - **Purpose**: Demonstrate ensemble AI decision-making and show how different models complement each other
 - **Trigger**: User enables multiple agents for same asset
-- **Progression**: Model A analyzes sentiment → Model B evaluates technical indicators → Model C assesses risk → System aggregates confidence scores → Generates consensus signal only if majority agree and average confidence >70%
+- **Progression**: Model A analyzes sentiment → Model B evaluates technical indicators → Model C assesses risk → System aggregates confidence scores → Generates consensus signal only if majority agree and average confidence >60%
 - **Success criteria**: Multi-model signals show combined reasoning, confidence reflects consensus strength, decisions only made when models align
 
 ### AI Strategy Auto-Adjustment

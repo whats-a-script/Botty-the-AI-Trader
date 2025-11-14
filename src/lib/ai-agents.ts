@@ -92,8 +92,7 @@ Analyze and provide a trading decision. Return valid JSON:
 Be conservative. High confidence requires clear evidence AND alignment with ${config.holdingMode} timeframe.`
 
   try {
-    const promptText = window.spark.llmPrompt([promptContent], promptContent)
-    const response = await window.spark.llm(promptText, getModelName(config.model), true)
+    const response = await window.spark.llm(promptContent, getModelName(config.model), true)
     const result = JSON.parse(response)
     
     return {
@@ -192,8 +191,7 @@ Based on current market conditions and typical crypto market sentiment patterns,
 }`
 
   try {
-    const prompt = window.spark.llmPrompt([promptContent], promptContent)
-    const response = await window.spark.llm(prompt, getModelName(config.model), true)
+    const response = await window.spark.llm(promptContent, getModelName(config.model), true)
     return JSON.parse(response)
   } catch {
     return {

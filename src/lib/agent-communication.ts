@@ -61,8 +61,7 @@ Return JSON:
 }`
 
   try {
-    const promptText = window.spark.llmPrompt([promptContent], promptContent)
-    const response = await window.spark.llm(promptText, 'gpt-4o-mini', true)
+    const response = await window.spark.llm(promptContent, 'gpt-4o-mini', true)
     const result = JSON.parse(response)
     
     return {
@@ -110,8 +109,7 @@ Summary: ${agreeCount} agree, ${disagreeCount} disagree, ${responses.length - ag
 Provide a consensus summary (2-3 sentences) that synthesizes the group's perspective.`
 
   try {
-    const promptText = window.spark.llmPrompt([promptContent], promptContent)
-    const consensusContent = await window.spark.llm(promptText, 'gpt-4o-mini', false)
+    const consensusContent = await window.spark.llm(promptContent, 'gpt-4o-mini', false)
     
     return {
       id: `msg-${Date.now()}-consensus`,

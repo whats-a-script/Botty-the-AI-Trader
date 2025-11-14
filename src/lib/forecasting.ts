@@ -23,8 +23,7 @@ Return valid JSON:
 }`
 
   try {
-    const promptText = window.spark.llmPrompt([promptContent], promptContent)
-    const response = await window.spark.llm(promptText, 'gpt-4o-mini', true)
+    const response = await window.spark.llm(promptContent, 'gpt-4o-mini', true)
     const result = JSON.parse(response)
     return {
       sentiment: result.sentiment || 'neutral',
@@ -69,8 +68,7 @@ Return valid JSON:
 }`
 
   try {
-    const promptText = window.spark.llmPrompt([promptContent], promptContent)
-    const response = await window.spark.llm(promptText, 'gpt-4o-mini', true)
+    const response = await window.spark.llm(promptContent, 'gpt-4o-mini', true)
     const result = JSON.parse(response)
     return {
       sentiment: result.sentiment || 'neutral',
@@ -180,8 +178,7 @@ Return valid JSON:
 Be data-driven. High confidence requires strong evidence across ALL factors.`
 
   try {
-    const promptText = window.spark.llmPrompt([promptContent], promptContent)
-    const response = await window.spark.llm(promptText, 'gpt-4o', true)
+    const response = await window.spark.llm(promptContent, 'gpt-4o', true)
     const result = JSON.parse(response)
     
     const predictions = generatePredictionPoints(
