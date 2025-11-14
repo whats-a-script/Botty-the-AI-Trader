@@ -11,23 +11,33 @@ export async function generateForecast(asset: Asset): Promise<Forecast> {
   const priceStrength = calculatePriceStrength(recentHistory)
   const supportResistance = calculateSupportResistance(recentHistory, currentPrice)
   
+  const currentPriceStr = currentPrice.toFixed(4)
+  const returnsStr = returns.toFixed(2)
+  const momentumStr = momentum.toFixed(2)
+  const rsiStr = rsi.toFixed(2)
+  const volatilityStr = (asset.volatility * 100).toFixed(2)
+  const supportStr = supportResistance.support.toFixed(4)
+  const resistanceStr = supportResistance.resistance.toFixed(4)
+  const distSupportStr = supportResistance.distanceFromSupport.toFixed(2)
+  const distResistanceStr = supportResistance.distanceFromResistance.toFixed(2)
+  
   const promptText = `You are an expert quantitative analyst with deep expertise in technical analysis and market microstructure. Analyze this cryptocurrency asset using the comprehensive data provided.
 
 Asset: ${asset.name} (${asset.symbol})
-Current Price: $${currentPrice.toFixed(4)}
+Current Price: $${currentPriceStr}
 
 TECHNICAL INDICATORS:
-- Returns (60-period): ${returns.toFixed(2)}%
+- Returns (60-period): ${returnsStr}%
 - Trend Classification: ${trend}
-- Momentum Score: ${momentum.toFixed(2)}
-- RSI (14-period): ${rsi.toFixed(2)}
-- Volatility: ${(asset.volatility * 100).toFixed(2)}%
+- Momentum Score: ${momentumStr}
+- RSI (14-period): ${rsiStr}
+- Volatility: ${volatilityStr}%
 - Volatility Trend: ${volatilityTrend}
 - Price Strength: ${priceStrength}
-- Support Level: $${supportResistance.support.toFixed(4)}
-- Resistance Level: $${supportResistance.resistance.toFixed(4)}
-- Distance from Support: ${supportResistance.distanceFromSupport.toFixed(2)}%
-- Distance from Resistance: ${supportResistance.distanceFromResistance.toFixed(2)}%
+- Support Level: $${supportStr}
+- Resistance Level: $${resistanceStr}
+- Distance from Support: ${distSupportStr}%
+- Distance from Resistance: ${distResistanceStr}%
 
 ANALYSIS GUIDELINES:
 Your confidence level should reflect data quality and indicator alignment:

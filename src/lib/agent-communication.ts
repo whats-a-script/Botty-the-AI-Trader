@@ -94,13 +94,15 @@ async function generateConsensusMessage(
   
   const consensusAgent = agents[Math.floor(agents.length / 2)]
   
+  const responsesText = responses.map(r => `- ${r.agentName}: ${r.agreement} - ${r.response}`).join('\n')
+  
   const promptText = `You are a consensus coordinator for AI trading agents.
 
 Asset: ${asset.symbol}
 Original proposal: ${discussionMessage.signal?.action} with ${discussionMessage.signal?.confidence}% confidence
 
 Responses:
-${responses.map(r => `- ${r.agentName}: ${r.agreement} - ${r.response}`).join('\n')}
+${responsesText}
 
 Summary: ${agreeCount} agree, ${disagreeCount} disagree, ${responses.length - agreeCount - disagreeCount} neutral
 

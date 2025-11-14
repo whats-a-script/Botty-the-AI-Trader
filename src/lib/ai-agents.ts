@@ -16,6 +16,18 @@ export async function generateTradingSignal(
   const supportResistance = calculateSupportResistance(recentHistory, currentPrice)
 
   const modeParams = getModeParameters(config.mode)
+  const criteriaText = modeParams.criteria.join('\n')
+  const currentPriceStr = (isFinite(currentPrice) ? currentPrice : 0).toFixed(4)
+  const rsiStr = (isFinite(rsi) ? rsi : 50).toFixed(2)
+  const momentumStr = (isFinite(momentum) ? momentum : 0).toFixed(2)
+  const volatilityStr = (isFinite(asset.volatility) ? asset.volatility * 100 : 0).toFixed(2)
+  const supportStr = (isFinite(supportResistance.support) ? supportResistance.support : 0).toFixed(4)
+  const distSupportStr = (isFinite(supportResistance.distanceFromSupport) ? supportResistance.distanceFromSupport : 0).toFixed(1)
+  const resistanceStr = (isFinite(supportResistance.resistance) ? supportResistance.resistance : 0).toFixed(4)
+  const distResistanceStr = (isFinite(supportResistance.distanceFromResistance) ? supportResistance.distanceFromResistance : 0).toFixed(1)
+  const cashStr = (isFinite(portfolio.cash) ? portfolio.cash : 0).toFixed(2)
+  const drawdownStr = (isFinite(portfolio.currentDrawdown) ? portfolio.currentDrawdown : 0).toFixed(2)
+  const pnlStr = (isFinite(portfolio.totalPnL) ? portfolio.totalPnL : 0).toFixed(2)
   
   const promptText = `You are an expert trading AI for ${config.name} using ${config.model} model.
 
@@ -23,20 +35,20 @@ TRADING MODE: ${config.mode.toUpperCase()}
 ${modeParams.description}
 
 ASSET: ${asset.name} (${asset.symbol})
-Current Price: $${(isFinite(currentPrice) ? currentPrice : 0).toFixed(4)}
+Current Price: $${currentPriceStr}
 
 TECHNICAL ANALYSIS:
-- RSI (14): ${(isFinite(rsi) ? rsi : 50).toFixed(2)}
+- RSI (14): ${rsiStr}
 - Trend: ${trend}
-- Momentum: ${(isFinite(momentum) ? momentum : 0).toFixed(2)}%
-- Volatility: ${(isFinite(asset.volatility) ? asset.volatility * 100 : 0).toFixed(2)}% (${volatilityTrend})
-- Support: $${(isFinite(supportResistance.support) ? supportResistance.support : 0).toFixed(4)} (${(isFinite(supportResistance.distanceFromSupport) ? supportResistance.distanceFromSupport : 0).toFixed(1)}% away)
-- Resistance: $${(isFinite(supportResistance.resistance) ? supportResistance.resistance : 0).toFixed(4)} (${(isFinite(supportResistance.distanceFromResistance) ? supportResistance.distanceFromResistance : 0).toFixed(1)}% away)
+- Momentum: ${momentumStr}%
+- Volatility: ${volatilityStr}% (${volatilityTrend})
+- Support: $${supportStr} (${distSupportStr}% away)
+- Resistance: $${resistanceStr} (${distResistanceStr}% away)
 
 PORTFOLIO STATE:
-- Available Cash: $${(isFinite(portfolio.cash) ? portfolio.cash : 0).toFixed(2)}
-- Current Drawdown: ${(isFinite(portfolio.currentDrawdown) ? portfolio.currentDrawdown : 0).toFixed(2)}%
-- Total P&L: $${(isFinite(portfolio.totalPnL) ? portfolio.totalPnL : 0).toFixed(2)}
+- Available Cash: $${cashStr}
+- Current Drawdown: ${drawdownStr}%
+- Total P&L: $${pnlStr}
 
 RISK PARAMETERS:
 - Max Leverage: ${config.maxLeverage}x
@@ -47,7 +59,7 @@ RISK PARAMETERS:
 - Volatility Threshold: ${config.volatilityThreshold}%
 
 DECISION CRITERIA FOR HIGH CONFIDENCE (85%+):
-1. ${modeParams.criteria.join('\n')}
+1. ${criteriaText}
 2. Clear technical setup with 4+ aligned indicators
 3. Risk/reward ratio meets or exceeds target
 4. Volatility within acceptable range
@@ -155,8 +167,9 @@ export async function generateMultiModelSignal(
 }
 
 async function analyzeMarketSentiment(asset: Asset, config: AgentConfig) {
+  const currentPriceStr = asset.currentPrice.toFixed(4)
   const prompt = `Analyze market sentiment for ${asset.name} (${asset.symbol}).
-Current price: $${asset.currentPrice.toFixed(4)}
+Current price: $${currentPriceStr}
 
 Based on current market conditions and typical crypto market sentiment patterns, provide:
 {
