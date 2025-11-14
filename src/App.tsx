@@ -122,7 +122,10 @@ function App() {
           }
         }
         
-        setAssets([...coinbaseAssets, ...customAssets])
+        const allAssets = [...coinbaseAssets, ...customAssets].sort((a, b) => 
+          a.symbol.localeCompare(b.symbol)
+        )
+        setAssets(allAssets)
         toast.success(`Loaded ${coinbaseAssets.length} crypto assets`)
       } catch (error) {
         console.error('Error loading Coinbase data:', error)
@@ -152,7 +155,7 @@ function App() {
             if (!newPrice) return asset
             
             return updatePriceWithRealData(asset, newPrice)
-          })
+          }).sort((a, b) => a.symbol.localeCompare(b.symbol))
         })
 
         const assetPriceMap = new Map<string, number>()
