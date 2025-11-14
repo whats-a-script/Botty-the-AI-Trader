@@ -206,7 +206,7 @@ function App() {
 
     const interval = setInterval(async () => {
       await executeAutoTrades()
-    }, 30000)
+    }, 60000)
 
     return () => clearInterval(interval)
   }, [autoTradeEnabled, agents, assets, portfolio])
