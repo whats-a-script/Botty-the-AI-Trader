@@ -163,7 +163,7 @@ export async function askUnifiedAgent(
   const contributions = await Promise.all(
     enabledAgents.map(async (agent) => {
       try {
-        const promptText = `You are ${agent.name}, an AI trading agent with ${agent.mode} trading mode.
+        const promptContent = `You are ${agent.name}, an AI trading agent with ${agent.mode} trading mode.
 
 ${portfolioContext}
 ${marketContext}
@@ -172,7 +172,12 @@ User Question: "${question}"
 
 Provide a concise, specific answer from your perspective as a ${agent.mode} trader. Be actionable and reference specific assets or strategies when relevant. Keep your response to 2-3 sentences.`
 
+        const promptText = window.spark.llmPrompt([promptContent], promptContent)
         const response = await window.spark.llm(promptText, 'gpt-4o-mini')
+        
+        if (!response || response.trim().length === 0) {
+          throw new Error('Empty response from LLM')
+        }
         
         return {
           agentName: agent.name,
@@ -183,7 +188,7 @@ Provide a concise, specific answer from your perspective as a ${agent.mode} trad
         console.error(`Error getting response from ${agent.name}:`, error)
         return {
           agentName: agent.name,
-          response: 'Unable to respond at this time.',
+          response: `Error: ${error instanceof Error ? error.message : 'Unable to respond at this time'}`,
           confidence: 0
         }
       }
@@ -200,7 +205,7 @@ Provide a concise, specific answer from your perspective as a ${agent.mode} trad
     }
   }
 
-  const consensusPromptText = `You are a unified AI trading agent synthesizing input from multiple expert agents.
+  const consensusPromptContent = `You are a unified AI trading agent synthesizing input from multiple expert agents.
 
 User Question: "${question}"
 
@@ -213,6 +218,7 @@ ${validContributions.map(c => `- ${c.agentName}: ${c.response}`).join('\n')}
 Synthesize these responses into one coherent, actionable answer that represents the unified perspective of all agents. If agents disagree, acknowledge the different viewpoints. Be specific and direct. Keep to 3-4 sentences.`
   
   try {
+    const consensusPromptText = window.spark.llmPrompt([consensusPromptContent], consensusPromptContent)
     const unifiedAnswer = await window.spark.llm(consensusPromptText, 'gpt-4o')
     
     return {

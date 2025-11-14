@@ -31,7 +31,7 @@ export async function generateTradingSignal(
   const drawdownStr = (isFinite(portfolio.currentDrawdown) ? portfolio.currentDrawdown : 0).toFixed(2)
   const pnlStr = (isFinite(portfolio.totalPnL) ? portfolio.totalPnL : 0).toFixed(2)
   
-  const promptText = `You are an expert trading AI for ${config.name} using ${config.model} model.
+  const promptContent = `You are an expert trading AI for ${config.name} using ${config.model} model.
 
 TRADING MODE: ${config.mode.toUpperCase()}
 ${modeParams.description}
@@ -92,6 +92,7 @@ Analyze and provide a trading decision. Return valid JSON:
 Be conservative. High confidence requires clear evidence AND alignment with ${config.holdingMode} timeframe.`
 
   try {
+    const promptText = window.spark.llmPrompt([promptContent], promptContent)
     const response = await window.spark.llm(promptText, getModelName(config.model), true)
     const result = JSON.parse(response)
     
@@ -180,7 +181,7 @@ export async function generateMultiModelSignal(
 
 async function analyzeMarketSentiment(asset: Asset, config: AgentConfig) {
   const currentPriceStr = asset.currentPrice.toFixed(4)
-  const prompt = `Analyze market sentiment for ${asset.name} (${asset.symbol}).
+  const promptContent = `Analyze market sentiment for ${asset.name} (${asset.symbol}).
 Current price: $${currentPriceStr}
 
 Based on current market conditions and typical crypto market sentiment patterns, provide:
@@ -191,6 +192,7 @@ Based on current market conditions and typical crypto market sentiment patterns,
 }`
 
   try {
+    const prompt = window.spark.llmPrompt([promptContent], promptContent)
     const response = await window.spark.llm(prompt, getModelName(config.model), true)
     return JSON.parse(response)
   } catch {

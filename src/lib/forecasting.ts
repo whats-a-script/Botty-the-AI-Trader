@@ -1,7 +1,7 @@
 import { Asset, Forecast, PricePoint, NewsSentiment, SocialSentiment } from './types'
 
 async function generateNewsSentiment(asset: Asset): Promise<NewsSentiment> {
-  const promptText = `You are a financial news analyst. Generate a realistic news sentiment analysis for ${asset.name} (${asset.symbol}) cryptocurrency.
+  const promptContent = `You are a financial news analyst. Generate a realistic news sentiment analysis for ${asset.name} (${asset.symbol}) cryptocurrency.
 
 Current Price: $${asset.currentPrice.toFixed(4)}
 Recent Price Action: ${calculateReturns(asset.priceHistory.slice(-30)).toFixed(2)}%
@@ -23,6 +23,7 @@ Return valid JSON:
 }`
 
   try {
+    const promptText = window.spark.llmPrompt([promptContent], promptContent)
     const response = await window.spark.llm(promptText, 'gpt-4o-mini', true)
     const result = JSON.parse(response)
     return {
@@ -45,7 +46,7 @@ Return valid JSON:
 }
 
 async function generateSocialSentiment(asset: Asset): Promise<SocialSentiment> {
-  const promptText = `You are a social media sentiment analyst. Generate realistic social sentiment analysis for ${asset.name} (${asset.symbol}) cryptocurrency.
+  const promptContent = `You are a social media sentiment analyst. Generate realistic social sentiment analysis for ${asset.name} (${asset.symbol}) cryptocurrency.
 
 Current Price: $${asset.currentPrice.toFixed(4)}
 Recent Movement: ${calculateReturns(asset.priceHistory.slice(-10)).toFixed(2)}%
@@ -68,6 +69,7 @@ Return valid JSON:
 }`
 
   try {
+    const promptText = window.spark.llmPrompt([promptContent], promptContent)
     const response = await window.spark.llm(promptText, 'gpt-4o-mini', true)
     const result = JSON.parse(response)
     return {
@@ -117,7 +119,7 @@ export async function generateForecast(asset: Asset): Promise<Forecast> {
   const distSupportStr = supportResistance.distanceFromSupport.toFixed(2)
   const distResistanceStr = supportResistance.distanceFromResistance.toFixed(2)
   
-  const promptText = `You are an expert quantitative analyst with deep expertise in technical analysis, news sentiment, and social analytics. Analyze this cryptocurrency asset using comprehensive data.
+  const promptContent = `You are an expert quantitative analyst with deep expertise in technical analysis, news sentiment, and social analytics. Analyze this cryptocurrency asset using comprehensive data.
 
 Asset: ${asset.name} (${asset.symbol})
 Current Price: $${currentPriceStr}
@@ -178,6 +180,7 @@ Return valid JSON:
 Be data-driven. High confidence requires strong evidence across ALL factors.`
 
   try {
+    const promptText = window.spark.llmPrompt([promptContent], promptContent)
     const response = await window.spark.llm(promptText, 'gpt-4o', true)
     const result = JSON.parse(response)
     
