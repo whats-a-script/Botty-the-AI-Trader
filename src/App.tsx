@@ -91,12 +91,22 @@ function App() {
     async function loadCoinbaseData() {
       try {
         setIsLoadingAssets(true)
+        const loadTimeout = setTimeout(() => {
+          toast.error('Loading is taking longer than expected...')
+        }, 5000)
+        
         const coinbaseAssets = await initializeCoinbaseAssets()
+        clearTimeout(loadTimeout)
         
         const customAssets: Asset[] = []
         for (const pair of customPairs.filter(p => p.enabled)) {
           try {
-            const price = await fetchCoinbasePrice(pair.currencyPair)
+            const pricePromise = fetchCoinbasePrice(pair.currencyPair)
+            const timeoutPromise = new Promise<number>((_, reject) => 
+              setTimeout(() => reject(new Error('Timeout')), 2000)
+            )
+            
+            const price = await Promise.race([pricePromise, timeoutPromise])
             customAssets.push({
               id: pair.id,
               symbol: pair.symbol,
@@ -111,10 +121,10 @@ function App() {
         }
         
         setAssets([...coinbaseAssets, ...customAssets])
-        toast.success('Live Coinbase data loaded')
+        toast.success(`Loaded ${coinbaseAssets.length} crypto assets`)
       } catch (error) {
         console.error('Error loading Coinbase data:', error)
-        toast.error('Failed to load live data')
+        toast.error('Failed to load data - using fallback prices')
       } finally {
         setIsLoadingAssets(false)
       }

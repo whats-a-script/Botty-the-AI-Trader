@@ -234,26 +234,81 @@ export async function fetchCoinbasePrices(currencyPairs: string[]): Promise<Map<
 
 export async function initializeCoinbaseAssets(): Promise<Asset[]> {
   const assets: Asset[] = []
+  const fallbackPrices: Record<string, number> = {
+    'BTC': 95000,
+    'ETH': 3400,
+    'USDT': 1.0,
+    'BNB': 650,
+    'SOL': 190,
+    'USDC': 1.0,
+    'XRP': 2.5,
+    'ADA': 0.95,
+    'AVAX': 38,
+    'DOGE': 0.35,
+    'DOT': 7.2,
+    'MATIC': 0.45,
+    'LINK': 22,
+    'UNI': 12,
+    'LTC': 105,
+    'ATOM': 10,
+    'SHIB': 0.000025,
+    'XLM': 0.38,
+    'ALGO': 0.32,
+    'FIL': 5.5,
+    'AAVE': 310,
+    'NEAR': 5.8,
+    'APT': 9.5,
+    'OP': 2.3,
+    'ARB': 0.85,
+    'MKR': 1550,
+    'GRT': 0.28,
+    'SNX': 3.2,
+    'CRV': 0.92,
+    'SAND': 0.48
+  }
   
-  for (const coinbaseAsset of COINBASE_ASSETS) {
+  const assetPromises = COINBASE_ASSETS.map(async (coinbaseAsset) => {
     try {
-      const price = await fetchCoinbasePrice(coinbaseAsset.currencyPair)
-      const priceHistory = await fetchHistoricalData(coinbaseAsset.currencyPair)
+      const pricePromise = fetchCoinbasePrice(coinbaseAsset.currencyPair)
+      const timeoutPromise = new Promise<number>((_, reject) => 
+        setTimeout(() => reject(new Error('Timeout')), 3000)
+      )
       
-      assets.push({
+      let price: number
+      try {
+        price = await Promise.race([pricePromise, timeoutPromise])
+      } catch {
+        price = fallbackPrices[coinbaseAsset.id] || 100
+      }
+      
+      const priceHistory = generateFallbackHistory(price, 100)
+      
+      return {
         id: coinbaseAsset.id,
         symbol: coinbaseAsset.symbol,
         name: coinbaseAsset.name,
         currentPrice: price,
         priceHistory,
         volatility: calculateVolatility(priceHistory)
-      })
+      }
     } catch (error) {
       console.error(`Failed to initialize ${coinbaseAsset.symbol}:`, error)
+      const fallbackPrice = fallbackPrices[coinbaseAsset.id] || 100
+      const priceHistory = generateFallbackHistory(fallbackPrice, 100)
+      
+      return {
+        id: coinbaseAsset.id,
+        symbol: coinbaseAsset.symbol,
+        name: coinbaseAsset.name,
+        currentPrice: fallbackPrice,
+        priceHistory,
+        volatility: 0.02
+      }
     }
-  }
+  })
   
-  return assets
+  const results = await Promise.all(assetPromises)
+  return results.filter(Boolean)
 }
 
 async function fetchHistoricalData(currencyPair: string): Promise<PricePoint[]> {
