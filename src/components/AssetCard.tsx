@@ -22,7 +22,9 @@ export function AssetCard({ asset, onClick }: AssetCardProps) {
       <CardHeader className="pb-3">
         <div className="flex items-start justify-between">
           <div>
-            <CardTitle className="text-lg">{asset.symbol}</CardTitle>
+            <CardTitle className={`text-lg ${isPositive ? 'text-[#39FF14]' : ''}`}>
+              {asset.symbol}
+            </CardTitle>
             <p className="text-sm text-muted-foreground mt-1">{asset.name}</p>
           </div>
           <Badge variant={isPositive ? 'default' : 'destructive'} className="flex items-center gap-1">
@@ -32,7 +34,7 @@ export function AssetCard({ asset, onClick }: AssetCardProps) {
         </div>
       </CardHeader>
       <CardContent>
-        <div className="text-2xl font-semibold">
+        <div className={`text-2xl font-semibold ${isPositive ? 'text-[#39FF14]' : ''}`}>
           {formatPrice(asset.currentPrice)}
         </div>
         <p className="text-xs text-muted-foreground mt-1">
