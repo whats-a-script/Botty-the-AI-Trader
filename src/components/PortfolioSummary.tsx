@@ -11,7 +11,9 @@ interface PortfolioSummaryProps {
 
 export function PortfolioSummary({ portfolio, totalValue }: PortfolioSummaryProps) {
   const totalPnL = totalValue - portfolio.startingBalance
-  const totalPnLPercent = (totalPnL / portfolio.startingBalance) * 100
+  const totalPnLPercent = portfolio.startingBalance > 0 
+    ? (totalPnL / portfolio.startingBalance) * 100 
+    : 0
   const isPositive = totalPnL >= 0
 
   return (
@@ -48,7 +50,7 @@ export function PortfolioSummary({ portfolio, totalValue }: PortfolioSummaryProp
           <div className={`text-2xl font-bold flex items-center gap-2 ${isPositive ? 'text-success' : 'text-destructive'}`}>
             {isPositive ? <ArrowUp size={20} /> : <ArrowDown size={20} />}
             {formatPrice(Math.abs(totalPnL))}
-            <span className="text-lg">({totalPnLPercent.toFixed(2)}%)</span>
+            <span className="text-lg">({(isFinite(totalPnLPercent) ? totalPnLPercent : 0).toFixed(2)}%)</span>
           </div>
         </div>
       </CardContent>

@@ -62,7 +62,7 @@ export function SignalsDashboard({ signals, assets, onExecuteSignal }: SignalsDa
                       variant={signal.confidence >= 90 ? 'default' : 'secondary'}
                       className="text-sm"
                     >
-                      {signal.confidence.toFixed(0)}% confident
+                      {(isFinite(signal.confidence) ? signal.confidence : 0).toFixed(0)}% confident
                     </Badge>
                   </div>
                 </CardHeader>

@@ -51,6 +51,7 @@ export function PositionsTable({ positions }: PositionsTableProps) {
               const { pnl, pnlPercent } = calculatePositionPnL(position)
               const isPositive = pnl >= 0
               const currentValue = position.quantity * position.currentPrice
+              const safePnlPercent = isFinite(pnlPercent) ? pnlPercent : 0
 
               return (
                 <TableRow key={`${position.assetId}-${position.type}`}>
@@ -60,7 +61,7 @@ export function PositionsTable({ positions }: PositionsTableProps) {
                       {position.type}
                     </Badge>
                   </TableCell>
-                  <TableCell className="text-right">{position.quantity.toFixed(4)}</TableCell>
+                  <TableCell className="text-right">{(position.quantity || 0).toFixed(4)}</TableCell>
                   <TableCell className="text-right">{position.leverage}x</TableCell>
                   <TableCell className="text-right">{formatPrice(position.avgEntryPrice)}</TableCell>
                   <TableCell className="text-right">{formatPrice(position.currentPrice)}</TableCell>
@@ -68,7 +69,7 @@ export function PositionsTable({ positions }: PositionsTableProps) {
                   <TableCell className={`text-right font-semibold ${isPositive ? 'text-success' : 'text-destructive'}`}>
                     <div className="flex items-center justify-end gap-1">
                       {isPositive ? <TrendUp size={14} /> : <TrendDown size={14} />}
-                      {formatPrice(Math.abs(pnl))} ({pnlPercent.toFixed(2)}%)
+                      {formatPrice(Math.abs(pnl))} ({safePnlPercent.toFixed(2)}%)
                     </div>
                   </TableCell>
                   <TableCell className="text-right text-xs text-muted-foreground">

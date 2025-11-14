@@ -244,21 +244,21 @@ export function AgentManager({
                     <div className="flex items-center justify-between text-sm">
                       <span className="text-muted-foreground">P&L</span>
                       <span className={perf.totalPnL >= 0 ? 'text-success' : 'text-destructive'}>
-                        ${perf.totalPnL.toFixed(2)}
+                        ${(isFinite(perf.totalPnL) ? perf.totalPnL : 0).toFixed(2)}
                       </span>
                     </div>
                     <div className="flex items-center justify-between text-sm">
                       <span className="text-muted-foreground">Win Rate</span>
-                      <span>{(perf.winRate * 100).toFixed(1)}%</span>
+                      <span>{(isFinite(perf.winRate) ? perf.winRate * 100 : 0).toFixed(1)}%</span>
                     </div>
                     <div className="flex items-center justify-between text-sm">
                       <span className="text-muted-foreground">Trades</span>
-                      <span>{perf.totalTrades}</span>
+                      <span>{perf.totalTrades || 0}</span>
                     </div>
                     <div className="flex items-center justify-between text-sm">
                       <span className="text-muted-foreground">Confidence</span>
                       <Badge variant={perf.avgConfidence >= 85 ? 'default' : 'secondary'}>
-                        {perf.avgConfidence.toFixed(0)}%
+                        {(isFinite(perf.avgConfidence) ? perf.avgConfidence : 0).toFixed(0)}%
                       </Badge>
                     </div>
                   </div>

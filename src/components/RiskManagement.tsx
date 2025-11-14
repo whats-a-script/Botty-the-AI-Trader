@@ -11,19 +11,23 @@ interface RiskManagementProps {
 }
 
 export function RiskManagement({ portfolio, totalValue }: RiskManagementProps) {
-  const drawdownPercent = portfolio.currentDrawdown
+  const drawdownPercent = portfolio.currentDrawdown || 0
   const riskLevel = drawdownPercent > 15 ? 'high' : drawdownPercent > 10 ? 'medium' : 'low'
-  const maxDrawdownPercent = portfolio.maxDrawdown
+  const maxDrawdownPercent = portfolio.maxDrawdown || 0
   
   const leveragedPositions = portfolio.positions.filter(p => p.leverage > 1)
-  const totalLeverage = leveragedPositions.reduce((sum, p) => sum + p.leverage, 0) / Math.max(leveragedPositions.length, 1)
+  const totalLeverage = leveragedPositions.length > 0 
+    ? leveragedPositions.reduce((sum, p) => sum + p.leverage, 0) / leveragedPositions.length 
+    : 1
   
   const positionsValue = portfolio.positions.reduce((sum, p) => 
     sum + (p.quantity * p.currentPrice), 0
   )
-  const exposurePercent = (positionsValue / totalValue) * 100
+  const exposurePercent = totalValue > 0 ? (positionsValue / totalValue) * 100 : 0
   
-  const pnlPercent = ((totalValue - portfolio.startingBalance) / portfolio.startingBalance) * 100
+  const pnlPercent = portfolio.startingBalance > 0 
+    ? ((totalValue - portfolio.startingBalance) / portfolio.startingBalance) * 100 
+    : 0
 
   return (
     <div className="space-y-4">
@@ -40,13 +44,13 @@ export function RiskManagement({ portfolio, totalValue }: RiskManagementProps) {
             <div className="flex items-center justify-between mb-2">
               <span className="text-sm font-medium">Current Drawdown</span>
               <Badge variant={riskLevel === 'high' ? 'destructive' : riskLevel === 'medium' ? 'secondary' : 'default'}>
-                {drawdownPercent.toFixed(2)}%
+                {(isFinite(drawdownPercent) ? drawdownPercent : 0).toFixed(2)}%
               </Badge>
             </div>
             <Progress value={drawdownPercent} max={20} className="h-2" />
             <div className="flex justify-between text-xs text-muted-foreground mt-1">
               <span>0%</span>
-              <span>Max: {maxDrawdownPercent.toFixed(2)}%</span>
+              <span>Max: {(isFinite(maxDrawdownPercent) ? maxDrawdownPercent : 0).toFixed(2)}%</span>
               <span>20% (Critical)</span>
             </div>
           </div>
@@ -54,7 +58,7 @@ export function RiskManagement({ portfolio, totalValue }: RiskManagementProps) {
           <div>
             <div className="flex items-center justify-between mb-2">
               <span className="text-sm font-medium">Portfolio Exposure</span>
-              <span className="text-sm">{exposurePercent.toFixed(1)}%</span>
+              <span className="text-sm">{(isFinite(exposurePercent) ? exposurePercent : 0).toFixed(1)}%</span>
             </div>
             <Progress value={exposurePercent} max={100} className="h-2" />
             <div className="flex justify-between text-xs text-muted-foreground mt-1">
@@ -66,7 +70,7 @@ export function RiskManagement({ portfolio, totalValue }: RiskManagementProps) {
           <div>
             <div className="flex items-center justify-between mb-2">
               <span className="text-sm font-medium">Average Leverage</span>
-              <span className="text-sm">{totalLeverage.toFixed(1)}x</span>
+              <span className="text-sm">{(isFinite(totalLeverage) ? totalLeverage : 1).toFixed(1)}x</span>
             </div>
             <Progress value={totalLeverage * 10} max={100} className="h-2" />
             <div className="flex justify-between text-xs text-muted-foreground mt-1">
@@ -79,7 +83,7 @@ export function RiskManagement({ portfolio, totalValue }: RiskManagementProps) {
             <div>
               <span className="text-xs text-muted-foreground block">Total P&L</span>
               <span className={`text-lg font-bold ${pnlPercent >= 0 ? 'text-success' : 'text-destructive'}`}>
-                {pnlPercent >= 0 ? '+' : ''}{pnlPercent.toFixed(2)}%
+                {pnlPercent >= 0 ? '+' : ''}{(isFinite(pnlPercent) ? pnlPercent : 0).toFixed(2)}%
               </span>
             </div>
             <div>
@@ -92,7 +96,7 @@ export function RiskManagement({ portfolio, totalValue }: RiskManagementProps) {
             <Alert variant="destructive">
               <Warning size={16} />
               <AlertDescription>
-                <strong>Drawdown Alert:</strong> Portfolio is down {drawdownPercent.toFixed(1)}%. 
+                <strong>Drawdown Alert:</strong> Portfolio is down {(isFinite(drawdownPercent) ? drawdownPercent : 0).toFixed(1)}%. 
                 Consider reducing position sizes or pausing trading.
               </AlertDescription>
             </Alert>

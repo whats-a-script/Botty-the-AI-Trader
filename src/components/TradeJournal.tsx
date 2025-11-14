@@ -18,7 +18,7 @@ export function TradeJournal({ trades, portfolio }: TradeJournalProps) {
     total: trades.length,
     profitable: trades.filter(t => t.pnl && t.pnl > 0).length,
     losses: trades.filter(t => t.pnl && t.pnl < 0).length,
-    avgPnL: trades.reduce((sum, t) => sum + (t.pnl || 0), 0) / Math.max(trades.length, 1),
+    avgPnL: trades.length > 0 ? trades.reduce((sum, t) => sum + (t.pnl || 0), 0) / trades.length : 0,
     totalVolume: trades.reduce((sum, t) => sum + t.total, 0)
   }
   
@@ -47,14 +47,14 @@ export function TradeJournal({ trades, portfolio }: TradeJournalProps) {
         </Card>
         <Card>
           <CardContent className="pt-6">
-            <div className="text-2xl font-bold">{winRate.toFixed(1)}%</div>
+            <div className="text-2xl font-bold">{(isFinite(winRate) ? winRate : 0).toFixed(1)}%</div>
             <p className="text-xs text-muted-foreground">Win Rate</p>
           </CardContent>
         </Card>
         <Card>
           <CardContent className="pt-6">
             <div className={`text-2xl font-bold ${stats.avgPnL >= 0 ? 'text-success' : 'text-destructive'}`}>
-              ${stats.avgPnL.toFixed(2)}
+              ${(isFinite(stats.avgPnL) ? stats.avgPnL : 0).toFixed(2)}
             </div>
             <p className="text-xs text-muted-foreground">Avg P&L</p>
           </CardContent>
@@ -101,13 +101,13 @@ export function TradeJournal({ trades, portfolio }: TradeJournalProps) {
                     <TableCell>
                       <Badge variant="outline">{trade.positionType}</Badge>
                     </TableCell>
-                    <TableCell>{trade.quantity.toFixed(4)}</TableCell>
+                    <TableCell>{(trade.quantity || 0).toFixed(4)}</TableCell>
                     <TableCell>{formatPrice(trade.price)}</TableCell>
                     <TableCell>{trade.leverage}x</TableCell>
                     <TableCell>
                       {trade.pnl !== undefined ? (
                         <span className={trade.pnl >= 0 ? 'text-success' : 'text-destructive'}>
-                          {trade.pnl >= 0 ? '+' : ''}${trade.pnl.toFixed(2)}
+                          {trade.pnl >= 0 ? '+' : ''}${(isFinite(trade.pnl) ? trade.pnl : 0).toFixed(2)}
                         </span>
                       ) : (
                         <span className="text-muted-foreground">-</span>

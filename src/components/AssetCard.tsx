@@ -12,6 +12,7 @@ interface AssetCardProps {
 export function AssetCard({ asset, onClick }: AssetCardProps) {
   const returns = calculateReturns(asset.priceHistory)
   const isPositive = returns >= 0
+  const safeReturns = isFinite(returns) ? returns : 0
 
   return (
     <Card 
@@ -26,7 +27,7 @@ export function AssetCard({ asset, onClick }: AssetCardProps) {
           </div>
           <Badge variant={isPositive ? 'default' : 'destructive'} className="flex items-center gap-1">
             {isPositive ? <TrendUp size={14} /> : <TrendDown size={14} />}
-            {returns.toFixed(2)}%
+            {safeReturns.toFixed(2)}%
           </Badge>
         </div>
       </CardHeader>
@@ -35,7 +36,7 @@ export function AssetCard({ asset, onClick }: AssetCardProps) {
           {formatPrice(asset.currentPrice)}
         </div>
         <p className="text-xs text-muted-foreground mt-1">
-          Vol: {(asset.volatility * 100).toFixed(1)}%
+          Vol: {((asset.volatility || 0) * 100).toFixed(1)}%
         </p>
       </CardContent>
     </Card>

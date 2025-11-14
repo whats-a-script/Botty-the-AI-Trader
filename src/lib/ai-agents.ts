@@ -23,20 +23,20 @@ TRADING MODE: ${config.mode.toUpperCase()}
 ${modeParams.description}
 
 ASSET: ${asset.name} (${asset.symbol})
-Current Price: $${currentPrice.toFixed(4)}
+Current Price: $${(isFinite(currentPrice) ? currentPrice : 0).toFixed(4)}
 
 TECHNICAL ANALYSIS:
-- RSI (14): ${rsi.toFixed(2)}
+- RSI (14): ${(isFinite(rsi) ? rsi : 50).toFixed(2)}
 - Trend: ${trend}
-- Momentum: ${momentum.toFixed(2)}%
-- Volatility: ${(asset.volatility * 100).toFixed(2)}% (${volatilityTrend})
-- Support: $${supportResistance.support.toFixed(4)} (${supportResistance.distanceFromSupport.toFixed(1)}% away)
-- Resistance: $${supportResistance.resistance.toFixed(4)} (${supportResistance.distanceFromResistance.toFixed(1)}% away)
+- Momentum: ${(isFinite(momentum) ? momentum : 0).toFixed(2)}%
+- Volatility: ${(isFinite(asset.volatility) ? asset.volatility * 100 : 0).toFixed(2)}% (${volatilityTrend})
+- Support: $${(isFinite(supportResistance.support) ? supportResistance.support : 0).toFixed(4)} (${(isFinite(supportResistance.distanceFromSupport) ? supportResistance.distanceFromSupport : 0).toFixed(1)}% away)
+- Resistance: $${(isFinite(supportResistance.resistance) ? supportResistance.resistance : 0).toFixed(4)} (${(isFinite(supportResistance.distanceFromResistance) ? supportResistance.distanceFromResistance : 0).toFixed(1)}% away)
 
 PORTFOLIO STATE:
-- Available Cash: $${portfolio.cash.toFixed(2)}
-- Current Drawdown: ${portfolio.currentDrawdown.toFixed(2)}%
-- Total P&L: $${portfolio.totalPnL.toFixed(2)}
+- Available Cash: $${(isFinite(portfolio.cash) ? portfolio.cash : 0).toFixed(2)}
+- Current Drawdown: ${(isFinite(portfolio.currentDrawdown) ? portfolio.currentDrawdown : 0).toFixed(2)}%
+- Total P&L: $${(isFinite(portfolio.totalPnL) ? portfolio.totalPnL : 0).toFixed(2)}
 
 RISK PARAMETERS:
 - Max Leverage: ${config.maxLeverage}x

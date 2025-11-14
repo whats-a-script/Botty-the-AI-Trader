@@ -120,7 +120,7 @@ export function TradeForm({ assets, portfolio, onTrade }: TradeFormProps) {
         </Button>
 
         <div className="text-xs text-muted-foreground">
-          Available Cash: ${portfolio.cash.toFixed(2)}
+          Available Cash: ${(portfolio.cash || 0).toFixed(2)}
         </div>
       </CardContent>
     </Card>

@@ -44,7 +44,7 @@ export function canExecuteTrade(
   if (type === 'buy') {
     const cost = quantity * price
     if (portfolio.cash < cost) {
-      return { canExecute: false, reason: `Insufficient funds. Need $${cost.toFixed(2)}, have $${portfolio.cash.toFixed(2)}` }
+      return { canExecute: false, reason: `Insufficient funds. Need $${(isFinite(cost) ? cost : 0).toFixed(2)}, have $${(isFinite(portfolio.cash) ? portfolio.cash : 0).toFixed(2)}` }
     }
   } else {
     const position = portfolio.positions.find(p => p.assetId === assetId)
