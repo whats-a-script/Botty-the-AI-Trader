@@ -5,24 +5,40 @@ import { Badge } from '@/components/ui/badge'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Separator } from '@/components/ui/separator'
 import { Progress } from '@/components/ui/progress'
+import { Switch } from '@/components/ui/switch'
 import { Asset, AgentConfig, Portfolio } from '@/lib/types'
 import { getUnifiedAgentDecision, UnifiedAgentDecision } from '@/lib/unified-agent'
-import { Robot, CheckCircle, Warning, Clock, TrendUp, TrendDown, Minus } from '@phosphor-icons/react'
+import { Robot, CheckCircle, Warning, Clock, TrendUp, TrendDown, Minus, Lightning, Play, Stop } from '@phosphor-icons/react'
 import { toast } from 'sonner'
 
 interface UnifiedAgentPanelProps {
   assets: Asset[]
   agents: AgentConfig[]
   portfolio: Portfolio
+  autoTradeEnabled: boolean
+  onToggleAutoTrade: (enabled: boolean) => void
   onExecuteSignal: (assetId: string, action: 'buy' | 'sell', quantity: number) => void
 }
 
-export function UnifiedAgentPanel({ assets, agents, portfolio, onExecuteSignal }: UnifiedAgentPanelProps) {
+export function UnifiedAgentPanel({ assets, agents, portfolio, autoTradeEnabled, onToggleAutoTrade, onExecuteSignal }: UnifiedAgentPanelProps) {
   const [selectedAssetId, setSelectedAssetId] = useState<string>('')
   const [decision, setDecision] = useState<UnifiedAgentDecision | null>(null)
   const [isAnalyzing, setIsAnalyzing] = useState(false)
 
   const enabledAgents = agents.filter(a => a.enabled)
+
+  const handleToggleAutoTrade = (checked: boolean) => {
+    if (checked && enabledAgents.length === 0) {
+      toast.error('Enable at least one agent before starting auto-trading')
+      return
+    }
+    if (checked && portfolio.currentDrawdown > 15) {
+      toast.error('Cannot enable auto-trading: Drawdown limit exceeded')
+      return
+    }
+    onToggleAutoTrade(checked)
+    toast.success(checked ? 'Auto-trading enabled - agents will scan every 90 seconds' : 'Auto-trading disabled')
+  }
 
   const handleAnalyze = async () => {
     if (!selectedAssetId) return
@@ -82,43 +98,96 @@ export function UnifiedAgentPanel({ assets, agents, portfolio, onExecuteSignal }
 
   return (
     <div className="space-y-6">
-      <Card>
+      <Card className={autoTradeEnabled ? 'border-accent shadow-lg' : ''}>
         <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Robot size={24} />
-            Unified Agent Analysis
-          </CardTitle>
-          <CardDescription>
-            All {enabledAgents.length} enabled agents work together to analyze assets and provide unified recommendations
-          </CardDescription>
+          <div className="flex items-center justify-between">
+            <div>
+              <CardTitle className="flex items-center gap-2">
+                <Robot size={24} />
+                Unified Agent System
+              </CardTitle>
+              <CardDescription>
+                {enabledAgents.length} enabled agents work together to analyze and trade
+              </CardDescription>
+            </div>
+            <div className="flex items-center gap-3">
+              {autoTradeEnabled && (
+                <Badge variant="default" className="animate-pulse">
+                  <Lightning size={14} className="mr-1" weight="fill" />
+                  Auto-Trading Active
+                </Badge>
+              )}
+              <div className="flex items-center gap-2">
+                <Switch
+                  checked={autoTradeEnabled}
+                  onCheckedChange={handleToggleAutoTrade}
+                  disabled={enabledAgents.length === 0}
+                />
+                <span className="text-sm font-medium">
+                  {autoTradeEnabled ? 'ON' : 'OFF'}
+                </span>
+              </div>
+            </div>
+          </div>
         </CardHeader>
         <CardContent className="space-y-4">
-          <div className="flex items-center gap-4">
-            <div className="flex-1">
-              <Select value={selectedAssetId} onValueChange={setSelectedAssetId}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Select asset to analyze" />
-                </SelectTrigger>
-                <SelectContent>
-                  {assets.slice(0, 20).map(asset => (
-                    <SelectItem key={asset.id} value={asset.id}>
-                      {asset.symbol} - ${asset.currentPrice.toFixed(2)}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+          {autoTradeEnabled && (
+            <div className="bg-accent/10 border border-accent/30 rounded-lg p-4 space-y-2">
+              <div className="flex items-center gap-2 text-accent font-medium">
+                <Play size={16} weight="fill" />
+                Auto-Trading Mode Active
+              </div>
+              <p className="text-sm text-muted-foreground">
+                Unified agents automatically scan top assets every 90 seconds. Trades are executed when all agents reach 85%+ confidence consensus.
+              </p>
+              <div className="grid grid-cols-3 gap-3 mt-3 text-xs">
+                <div className="bg-background rounded p-2">
+                  <div className="text-muted-foreground">Safety Threshold</div>
+                  <div className="font-medium">85% Confidence</div>
+                </div>
+                <div className="bg-background rounded p-2">
+                  <div className="text-muted-foreground">Scan Interval</div>
+                  <div className="font-medium">90 seconds</div>
+                </div>
+                <div className="bg-background rounded p-2">
+                  <div className="text-muted-foreground">Max Drawdown</div>
+                  <div className="font-medium">15%</div>
+                </div>
+              </div>
             </div>
-            <Button 
-              onClick={handleAnalyze}
-              disabled={isAnalyzing || !selectedAssetId || enabledAgents.length === 0}
-            >
-              {isAnalyzing ? 'Analyzing...' : 'Analyze'}
-            </Button>
+          )}
+
+          <Separator />
+
+          <div>
+            <div className="text-sm font-medium mb-3">Manual Analysis</div>
+            <div className="flex items-center gap-4">
+              <div className="flex-1">
+                <Select value={selectedAssetId} onValueChange={setSelectedAssetId}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select asset to analyze" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {assets.slice(0, 20).map(asset => (
+                      <SelectItem key={asset.id} value={asset.id}>
+                        {asset.symbol} - ${asset.currentPrice.toFixed(2)}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <Button 
+                onClick={handleAnalyze}
+                disabled={isAnalyzing || !selectedAssetId || enabledAgents.length === 0}
+              >
+                {isAnalyzing ? 'Analyzing...' : 'Analyze'}
+              </Button>
+            </div>
           </div>
 
           {enabledAgents.length === 0 && (
             <div className="text-sm text-muted-foreground bg-muted/50 p-3 rounded-lg">
-              Enable at least one agent to perform unified analysis
+              Enable at least one agent in the "Agents" tab to use unified trading
             </div>
           )}
         </CardContent>

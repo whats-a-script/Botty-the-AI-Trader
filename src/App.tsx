@@ -60,7 +60,9 @@ function App() {
   const [isLoadingUser, setIsLoadingUser] = useState(true)
   const [signals, setSignals] = useState<TradingSignal[]>([])
   const [isGeneratingSignals, setIsGeneratingSignals] = useState(false)
-  const [autoTradeEnabled, setAutoTradeEnabled] = useState(false)
+  const [autoTradeEnabledRaw, setAutoTradeEnabledRaw] = useKV<boolean>('auto-trade-enabled', false)
+  const autoTradeEnabled = autoTradeEnabledRaw || false
+  const setAutoTradeEnabled = setAutoTradeEnabledRaw
   
   const [messagesRaw, setMessagesRaw] = useKV<AgentMessage[]>('agent-messages', [])
   const messages = messagesRaw || []
@@ -189,12 +191,13 @@ function App() {
     if (!autoTradeEnabled || agents.length === 0 || assets.length === 0) return
     if (portfolio.currentDrawdown > 15) {
       toast.warning('Auto-trading paused: Drawdown limit reached')
+      setAutoTradeEnabled(false)
       return
     }
 
     const interval = setInterval(async () => {
-      await generateSignalsForAllAgents()
-    }, 60000)
+      await executeAutoTrades()
+    }, 90000)
 
     return () => clearInterval(interval)
   }, [autoTradeEnabled, agents, assets, portfolio])
@@ -238,6 +241,60 @@ function App() {
     } catch (error) {
       console.error('Error generating signals:', error)
       toast.error('Failed to generate signals')
+    } finally {
+      setIsGeneratingSignals(false)
+    }
+  }
+
+  const executeAutoTrades = async () => {
+    if (!autoTradeEnabled || isGeneratingSignals) return
+
+    const enabledAgents = agents.filter(a => a.enabled)
+    if (enabledAgents.length === 0) {
+      toast.warning('No agents enabled for auto-trading')
+      setAutoTradeEnabled(false)
+      return
+    }
+
+    if (portfolio.currentDrawdown > 15) {
+      toast.warning('Auto-trading stopped: Drawdown limit reached')
+      setAutoTradeEnabled(false)
+      return
+    }
+
+    setIsGeneratingSignals(true)
+    
+    try {
+      const topAssets = assets.slice(0, 8)
+      const executedTrades: string[] = []
+
+      for (const asset of topAssets) {
+        try {
+          const unifiedDecision = await getUnifiedAgentDecision(asset, enabledAgents, portfolio)
+          
+          if (unifiedDecision.executionRecommendation === 'execute' && 
+              unifiedDecision.signal.confidence >= 85 &&
+              (unifiedDecision.signal.action === 'buy' || unifiedDecision.signal.action === 'sell')) {
+            
+            const quantity = unifiedDecision.signal.suggestedQuantity
+            if (quantity > 0) {
+              handleTrade(asset.id, unifiedDecision.signal.action, quantity)
+              executedTrades.push(`${unifiedDecision.signal.action.toUpperCase()} ${asset.symbol}`)
+            }
+          }
+        } catch (error) {
+          console.error(`Error in auto-trade for ${asset.symbol}:`, error)
+        }
+      }
+
+      if (executedTrades.length > 0) {
+        toast.success(`Auto-trading executed ${executedTrades.length} trades: ${executedTrades.join(', ')}`)
+      } else {
+        toast.info('Auto-trading scan complete - no high-confidence opportunities found')
+      }
+    } catch (error) {
+      console.error('Error in auto-trading:', error)
+      toast.error('Auto-trading error occurred')
     } finally {
       setIsGeneratingSignals(false)
     }
@@ -476,6 +533,8 @@ function App() {
                   assets={assets}
                   agents={agents}
                   portfolio={portfolio}
+                  autoTradeEnabled={autoTradeEnabled}
+                  onToggleAutoTrade={setAutoTradeEnabled}
                   onExecuteSignal={handleTrade}
                 />
               </TabsContent>

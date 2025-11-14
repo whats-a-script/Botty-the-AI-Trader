@@ -12,6 +12,13 @@ An advanced AI-powered autonomous trading simulator with multiple intelligent ag
 
 ## Essential Features
 
+### Unified Auto-Trading Mode
+- **Functionality**: One-click toggle to enable fully autonomous trading where all enabled AI agents work together to scan markets, reach consensus, and execute trades automatically every 90 seconds with no human intervention required
+- **Purpose**: Enable true hands-free algorithmic trading simulation where users can observe AI agents making real trading decisions autonomously based on collective intelligence
+- **Trigger**: User toggles auto-trading switch in Unified tab
+- **Progression**: Enable switch → System validates agents are enabled and drawdown <15% → Agents begin scanning top 8 assets every 90 seconds → Each asset analyzed by all agents → Consensus calculated → If consensus ≥85% confidence and unanimous recommendation to execute → Trade executed automatically → User notified → Repeat continuously until disabled or drawdown limit hit
+- **Success criteria**: Auto-trading executes trades without intervention, respects 85% confidence threshold, automatically stops at 15% drawdown, shows real-time status indicators, logs all automated decisions
+
 ### Multi-Agent AI Trading System
 - **Functionality**: Create and manage multiple independent AI trading agents, each with unique models (GPT-4o, GPT-4o-mini, DeepSeek, Qwen), trading modes (conservative/moderate/aggressive), risk parameters, and inter-agent communication capabilities
 - **Purpose**: Enable comparison of different AI models and strategies, allowing users to discover which approaches work best in various market conditions through agent collaboration and consensus building
