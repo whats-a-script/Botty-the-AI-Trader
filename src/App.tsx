@@ -23,6 +23,7 @@ import { TradeJournal } from '@/components/TradeJournal'
 import { AgentCommunication } from '@/components/AgentCommunication'
 import { CustomPairs } from '@/components/CustomPairs'
 import { UnifiedAgentPanel } from '@/components/UnifiedAgentPanel'
+import { RateLimitInfo } from '@/components/RateLimitWarning'
 import { generateTradingSignal, checkStopLossAndTakeProfit, adjustStrategyBasedOnPerformance } from '@/lib/ai-agents'
 import { getUnifiedAgentDecision } from '@/lib/unified-agent'
 import { ChartLine, Wallet, Clock, ArrowsClockwise, Spinner, User as UserIcon, Robot, Shield, BookOpen, Lightning, Chats, Coin, UsersThree } from '@phosphor-icons/react'
@@ -217,38 +218,56 @@ function App() {
     const enabledAgents = agents.filter(a => a.enabled)
     
     if (enabledAgents.length === 0) {
+      toast.warning('Please enable at least one agent first')
       setIsGeneratingSignals(false)
       return
     }
 
     try {
-      const topAssets = assets.slice(0, 10)
+      const topAssets = assets.slice(0, 5)
       const newSignals: TradingSignal[] = []
+      let rateLimitHit = false
 
       for (const asset of topAssets) {
         try {
           const unifiedDecision = await getUnifiedAgentDecision(asset, enabledAgents, portfolio)
+          
+          if (unifiedDecision.signal.reasoning?.includes('Rate limit')) {
+            rateLimitHit = true
+            break
+          }
           
           if (unifiedDecision.signal.confidence >= 60 && 
               unifiedDecision.signal.action !== 'hold' &&
               unifiedDecision.executionRecommendation === 'execute') {
             newSignals.push(unifiedDecision.signal)
           }
-        } catch (error) {
+        } catch (error: any) {
+          if (error?.message?.includes('429')) {
+            rateLimitHit = true
+            break
+          }
           console.error(`Error generating unified signal for ${asset.symbol}:`, error)
         }
+      }
+
+      if (rateLimitHit) {
+        toast.warning('Rate limit reached. Please wait 30 seconds before generating more signals.')
       }
 
       setSignals(newSignals)
       
       if (newSignals.length > 0) {
         toast.success(`Unified agents generated ${newSignals.length} high-confidence signals`)
-      } else {
+      } else if (!rateLimitHit) {
         toast.info('No strong signals found - agents recommend waiting')
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error generating signals:', error)
-      toast.error('Failed to generate signals')
+      const errorMsg = error?.message?.includes('429')
+        ? 'Rate limit reached. Please wait before retrying.'
+        : 'Failed to generate signals'
+      toast.error(errorMsg)
     } finally {
       setIsGeneratingSignals(false)
     }
@@ -273,12 +292,18 @@ function App() {
     setIsGeneratingSignals(true)
     
     try {
-      const topAssets = assets.slice(0, 8)
+      const topAssets = assets.slice(0, 3)
       const executedTrades: string[] = []
+      let rateLimitHit = false
 
       for (const asset of topAssets) {
         try {
           const unifiedDecision = await getUnifiedAgentDecision(asset, enabledAgents, portfolio)
+          
+          if (unifiedDecision.signal.reasoning?.includes('Rate limit')) {
+            rateLimitHit = true
+            break
+          }
           
           if (unifiedDecision.executionRecommendation === 'execute' && 
               unifiedDecision.signal.confidence >= 60 &&
@@ -290,19 +315,34 @@ function App() {
               executedTrades.push(`${unifiedDecision.signal.action.toUpperCase()} ${asset.symbol}`)
             }
           }
-        } catch (error) {
+        } catch (error: any) {
+          if (error?.message?.includes('429')) {
+            rateLimitHit = true
+            toast.warning('Auto-trading paused: Rate limit reached')
+            setAutoTradeEnabled(false)
+            break
+          }
           console.error(`Error in auto-trade for ${asset.symbol}:`, error)
         }
       }
 
-      if (executedTrades.length > 0) {
+      if (rateLimitHit) {
+        toast.warning('Auto-trading paused due to rate limits. Wait 1 minute before re-enabling.')
+        setAutoTradeEnabled(false)
+      } else if (executedTrades.length > 0) {
         toast.success(`Auto-trading executed ${executedTrades.length} trades: ${executedTrades.join(', ')}`)
       } else {
         toast.info('Auto-trading scan complete - no high-confidence opportunities found')
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error in auto-trading:', error)
-      toast.error('Auto-trading error occurred')
+      const errorMsg = error?.message?.includes('429')
+        ? 'Auto-trading paused: Rate limit reached'
+        : 'Auto-trading error occurred'
+      toast.error(errorMsg)
+      if (error?.message?.includes('429')) {
+        setAutoTradeEnabled(false)
+      }
     } finally {
       setIsGeneratingSignals(false)
     }
@@ -587,11 +627,12 @@ function App() {
 
               <TabsContent value="signals" className="space-y-6">
                 <div className="flex items-center justify-between mb-4">
-                  <div>
+                  <div className="flex-1">
                     <h3 className="text-lg font-semibold">Unified Agent Signals</h3>
-                    <p className="text-sm text-muted-foreground">
+                    <p className="text-sm text-muted-foreground mb-2">
                       All agents work together to generate consensus trading signals
                     </p>
+                    <RateLimitInfo />
                   </div>
                   <Button 
                     onClick={generateSignalsForAllAgents}

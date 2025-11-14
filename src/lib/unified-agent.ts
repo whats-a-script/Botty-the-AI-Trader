@@ -1,5 +1,6 @@
 import { Asset, TradingSignal, AgentConfig, Portfolio } from './types'
 import { generateTradingSignal } from './ai-agents'
+import { llmRateLimiter } from './rate-limiter'
 
 export interface UnifiedAgentDecision {
   signal: TradingSignal
@@ -172,7 +173,9 @@ User Question: "${question}"
 
 Provide a concise, specific answer from your perspective as a ${agent.mode} trader. Be actionable and reference specific assets or strategies when relevant. Keep your response to 2-3 sentences.`
 
-        const response = await window.spark.llm(prompt, 'gpt-4o-mini')
+        const response = await llmRateLimiter.execute(() =>
+          window.spark.llm(prompt, 'gpt-4o-mini')
+        )
         
         if (!response || response.trim().length === 0) {
           throw new Error('Empty response from LLM')
@@ -183,11 +186,14 @@ Provide a concise, specific answer from your perspective as a ${agent.mode} trad
           response: response.trim(),
           confidence: agent.mode === 'conservative' ? 70 : agent.mode === 'moderate' ? 80 : 85
         }
-      } catch (error) {
+      } catch (error: any) {
         console.error(`Error getting response from ${agent.name}:`, error)
+        const errorMsg = error?.message?.includes('429') 
+          ? 'Rate limit reached - reducing request frequency'
+          : 'Unable to respond at this time'
         return {
           agentName: agent.name,
-          response: `Error: ${error instanceof Error ? error.message : 'Unable to respond at this time'}`,
+          response: `Error: ${errorMsg}`,
           confidence: 0
         }
       }
@@ -217,7 +223,9 @@ ${validContributions.map(c => `- ${c.agentName}: ${c.response}`).join('\n')}
 Synthesize these responses into one coherent, actionable answer that represents the unified perspective of all agents. If agents disagree, acknowledge the different viewpoints. Be specific and direct. Keep to 3-4 sentences.`
   
   try {
-    const unifiedAnswer = await window.spark.llm(consensusPrompt, 'gpt-4o')
+    const unifiedAnswer = await llmRateLimiter.execute(() =>
+      window.spark.llm(consensusPrompt, 'gpt-4o')
+    )
     
     return {
       answer: unifiedAnswer.trim(),
@@ -226,11 +234,15 @@ Synthesize these responses into one coherent, actionable answer that represents 
         validContributions[0].response.toLowerCase().includes('buy') === c.response.toLowerCase().includes('buy')
       ) ? 'Strong consensus' : 'Mixed perspectives'
     }
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error generating unified answer:', error)
     
+    const fallbackAnswer = error?.message?.includes('429')
+      ? 'Rate limit reached. Please wait a moment before asking another question.'
+      : validContributions[0]?.response || 'Unable to generate response at this time.'
+    
     return {
-      answer: validContributions[0].response,
+      answer: fallbackAnswer,
       agentContributions: contributions,
       consensus: 'Error synthesizing - showing primary response'
     }

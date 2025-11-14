@@ -1,5 +1,6 @@
 import { Asset, TradingSignal, AgentConfig, TradingMode, HoldingMode, AIModel, MultiModelAnalysis, Portfolio } from './types'
 import { calculateRSI, detectTrend, calculateMomentum, calculateVolatilityTrend, calculateSupportResistance } from './technical-indicators'
+import { llmRateLimiter } from './rate-limiter'
 
 export async function generateTradingSignal(
   asset: Asset,
@@ -92,7 +93,9 @@ Analyze and provide a trading decision. Return valid JSON:
 Be conservative. High confidence requires clear evidence AND alignment with ${config.holdingMode} timeframe.`
 
   try {
-    const response = await window.spark.llm(prompt, getModelName(config.model), true)
+    const response = await llmRateLimiter.execute(() => 
+      window.spark.llm(prompt, getModelName(config.model), true)
+    )
     const result = JSON.parse(response)
     
     return {
@@ -107,13 +110,17 @@ Be conservative. High confidence requires clear evidence AND alignment with ${co
       leverage: Math.min(result.leverage || 1, config.maxLeverage),
       timestamp: Date.now()
     }
-  } catch (error) {
+  } catch (error: any) {
     console.error('Signal generation error:', error)
+    const errorMessage = error?.message?.includes('429') 
+      ? 'Rate limit reached - please wait before retrying'
+      : 'Error generating signal'
+    
     return {
       action: 'hold',
       assetId: asset.id,
       confidence: 0,
-      reasoning: 'Error generating signal',
+      reasoning: errorMessage,
       positionType: 'long',
       suggestedQuantity: 0,
       leverage: 1,
@@ -190,9 +197,12 @@ Based on current market conditions and typical crypto market sentiment patterns,
 }`
 
   try {
-    const response = await window.spark.llm(prompt, getModelName(config.model), true)
+    const response = await llmRateLimiter.execute(() =>
+      window.spark.llm(prompt, getModelName(config.model), true)
+    )
     return JSON.parse(response)
-  } catch {
+  } catch (error) {
+    console.error('Market sentiment analysis error:', error)
     return {
       sentiment: 'neutral' as const,
       confidence: 50,

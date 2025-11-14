@@ -1,4 +1,5 @@
 import { Asset, Forecast, PricePoint, NewsSentiment, SocialSentiment } from './types'
+import { llmRateLimiter } from './rate-limiter'
 
 async function generateNewsSentiment(asset: Asset): Promise<NewsSentiment> {
   const prompt = (window.spark.llmPrompt as any)`You are a financial news analyst. Generate a realistic news sentiment analysis for ${asset.name} (${asset.symbol}) cryptocurrency.
@@ -23,7 +24,9 @@ Return valid JSON:
 }`
 
   try {
-    const response = await window.spark.llm(prompt, 'gpt-4o-mini', true)
+    const response = await llmRateLimiter.execute(() =>
+      window.spark.llm(prompt, 'gpt-4o-mini', true)
+    )
     const result = JSON.parse(response)
     return {
       sentiment: result.sentiment || 'neutral',
@@ -32,13 +35,17 @@ Return valid JSON:
       summary: result.summary || 'Mixed signals in the market.',
       sources: result.sources || ['CryptoNews', 'Market Watch', 'Bloomberg Crypto']
     }
-  } catch (error) {
+  } catch (error: any) {
     console.error('News sentiment generation error:', error)
+    const errorMsg = error?.message?.includes('429')
+      ? 'Rate limit reached. Using fallback sentiment.'
+      : 'No significant news detected. Market showing typical volatility patterns.'
+    
     return {
       sentiment: 'neutral',
       score: 0,
       headline: 'Market Activity Normal',
-      summary: 'No significant news detected. Market showing typical volatility patterns.',
+      summary: errorMsg,
       sources: ['CryptoNews', 'Market Watch']
     }
   }
@@ -68,7 +75,9 @@ Return valid JSON:
 }`
 
   try {
-    const response = await window.spark.llm(prompt, 'gpt-4o-mini', true)
+    const response = await llmRateLimiter.execute(() =>
+      window.spark.llm(prompt, 'gpt-4o-mini', true)
+    )
     const result = JSON.parse(response)
     return {
       sentiment: result.sentiment || 'neutral',
@@ -78,15 +87,19 @@ Return valid JSON:
       keyTopics: result.keyTopics || ['price action', 'market discussion'],
       summary: result.summary || 'Community showing mixed sentiment.'
     }
-  } catch (error) {
+  } catch (error: any) {
     console.error('Social sentiment generation error:', error)
+    const errorMsg = error?.message?.includes('429')
+      ? 'Rate limit reached. Using fallback sentiment.'
+      : 'Community activity at normal levels with mixed sentiment.'
+    
     return {
       sentiment: 'neutral',
       score: 0,
       volume: 'medium',
       trending: false,
       keyTopics: ['price action', 'market discussion'],
-      summary: 'Community activity at normal levels with mixed sentiment.'
+      summary: errorMsg
     }
   }
 }
@@ -178,7 +191,9 @@ Return valid JSON:
 Be data-driven. High confidence requires strong evidence across ALL factors.`
 
   try {
-    const response = await window.spark.llm(prompt, 'gpt-4o', true)
+    const response = await llmRateLimiter.execute(() =>
+      window.spark.llm(prompt, 'gpt-4o', true)
+    )
     const result = JSON.parse(response)
     
     const predictions = generatePredictionPoints(
@@ -198,14 +213,18 @@ Be data-driven. High confidence requires strong evidence across ALL factors.`
       newsSentiment,
       socialSentiment
     }
-  } catch (error) {
+  } catch (error: any) {
     console.error('Forecast generation error:', error)
+    const errorMsg = error?.message?.includes('429')
+      ? 'Rate limit reached. Forecast temporarily unavailable.'
+      : 'Unable to generate detailed forecast. Market conditions show mixed signals across technical and sentiment analysis.'
+    
     return {
       assetId: asset.id,
       currentPrice,
       predictions: generatePredictionPoints(currentPrice, 0, asset.volatility, 10),
       confidence: 50,
-      reasoning: 'Unable to generate detailed forecast. Market conditions show mixed signals across technical and sentiment analysis.',
+      reasoning: errorMsg,
       timestamp: Date.now(),
       newsSentiment,
       socialSentiment

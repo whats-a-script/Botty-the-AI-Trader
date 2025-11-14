@@ -1,5 +1,6 @@
 import { AgentConfig, AgentMessage, AgentMessageResponse, Asset, Portfolio, TradingSignal } from './types'
 import { generateTradingSignal } from './ai-agents'
+import { llmRateLimiter } from './rate-limiter'
 
 export async function initiateAgentDiscussion(
   agents: AgentConfig[],
@@ -61,7 +62,9 @@ Return JSON:
 }`
 
   try {
-    const response = await window.spark.llm(prompt, 'gpt-4o-mini', true)
+    const response = await llmRateLimiter.execute(() =>
+      window.spark.llm(prompt, 'gpt-4o-mini', true)
+    )
     const result = JSON.parse(response)
     
     return {
@@ -71,12 +74,15 @@ Return JSON:
       agreement: result.agreement || 'neutral',
       timestamp: Date.now()
     }
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error generating agent response:', error)
+    const errorMsg = error?.message?.includes('429')
+      ? 'Rate limit reached'
+      : 'Unable to provide response'
     return {
       agentId: agent.id,
       agentName: agent.name,
-      response: 'Unable to provide response',
+      response: errorMsg,
       agreement: 'neutral',
       timestamp: Date.now()
     }
@@ -109,7 +115,9 @@ Summary: ${agreeCount} agree, ${disagreeCount} disagree, ${responses.length - ag
 Provide a consensus summary (2-3 sentences) that synthesizes the group's perspective.`
 
   try {
-    const consensusContent = await window.spark.llm(prompt, 'gpt-4o-mini', false)
+    const consensusContent = await llmRateLimiter.execute(() =>
+      window.spark.llm(prompt, 'gpt-4o-mini', false)
+    )
     
     return {
       id: `msg-${Date.now()}-consensus`,
@@ -119,13 +127,17 @@ Provide a consensus summary (2-3 sentences) that synthesizes the group's perspec
       content: consensusContent,
       timestamp: Date.now()
     }
-  } catch (error) {
+  } catch (error: any) {
+    const errorMsg = error?.message?.includes('429')
+      ? `Rate limit reached. Summary: ${agreeCount} agents agree, ${disagreeCount} disagree on ${asset.symbol}.`
+      : `Consensus: ${agreeCount} agents agree, ${disagreeCount} disagree. Mixed sentiment on ${asset.symbol}.`
+    
     return {
       id: `msg-${Date.now()}-consensus`,
       fromAgentId: consensusAgent.id,
       fromAgentName: 'Consensus',
       messageType: 'consensus',
-      content: `Consensus: ${agreeCount} agents agree, ${disagreeCount} disagree. Mixed sentiment on ${asset.symbol}.`,
+      content: errorMsg,
       timestamp: Date.now()
     }
   }
