@@ -309,11 +309,11 @@ function determineExecutionRecommendation(
   
   if (isUnanimous && signal.confidence >= 80) return 'execute'
   
-  if (hasConflict && signal.confidence < 75) return 'wait'
+  if (hasConflict && signal.confidence < 65) return 'wait'
   
-  if (signal.confidence >= 70) return 'execute'
+  if (signal.confidence >= 60) return 'execute'
   
-  if (signal.confidence >= 60) return 'wait'
+  if (signal.confidence >= 50) return 'wait'
   
   return 'skip'
 }
