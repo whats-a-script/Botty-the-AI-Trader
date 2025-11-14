@@ -26,7 +26,7 @@ export function AgentCommunication({
   const [selectedAsset, setSelectedAsset] = useState<string>('')
   const [isDiscussing, setIsDiscussing] = useState(false)
 
-  const communicatingAgents = agents.filter(a => a.enabled && a.canCommunicate)
+  const communicatingAgents = agents.filter(a => a.enabled && (a.canCommunicate ?? true))
 
   const handleStartDiscussion = async () => {
     if (!selectedAsset || communicatingAgents.length < 2) return
