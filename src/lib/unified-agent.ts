@@ -308,9 +308,9 @@ function determineExecutionRecommendation(
   
   if (hasConflict && signal.confidence < 75) return 'wait'
   
-  if (signal.confidence >= 85) return 'execute'
+  if (signal.confidence >= 70) return 'execute'
   
-  if (signal.confidence >= 70) return 'wait'
+  if (signal.confidence >= 60) return 'wait'
   
   return 'skip'
 }

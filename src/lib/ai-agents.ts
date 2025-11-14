@@ -58,7 +58,7 @@ RISK PARAMETERS:
 - Risk/Reward Ratio: ${config.riskRewardRatio}:1
 - Volatility Threshold: ${config.volatilityThreshold}%
 
-DECISION CRITERIA FOR HIGH CONFIDENCE (85%+):
+DECISION CRITERIA FOR HIGH CONFIDENCE (70%+):
 1. ${criteriaText}
 2. Clear technical setup with 4+ aligned indicators
 3. Risk/reward ratio meets or exceeds target
@@ -68,7 +68,7 @@ DECISION CRITERIA FOR HIGH CONFIDENCE (85%+):
 Analyze and provide a trading decision. Return valid JSON:
 {
   "action": "buy|sell|hold|close",
-  "confidence": <85-95 for strong setups, lower otherwise>,
+  "confidence": <70-95 for strong setups, lower otherwise>,
   "reasoning": "<specific technical reasons>",
   "positionType": "long|short",
   "suggestedQuantity": <appropriate position size>,
