@@ -98,7 +98,7 @@ export interface AgentMessage {
   fromAgentId: string
   fromAgentName: string
   toAgentId?: string
-  messageType: 'broadcast' | 'direct' | 'consensus'
+  messageType: 'broadcast' | 'direct' | 'consensus' | 'question'
   content: string
   signal?: TradingSignal
   timestamp: number

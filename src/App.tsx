@@ -295,7 +295,15 @@ function App() {
   }
 
   const handleNewMessage = (message: AgentMessage) => {
-    setMessages((current) => [...(current || []), message])
+    setMessages((current) => {
+      const existing = (current || []).findIndex(m => m.id === message.id)
+      if (existing >= 0) {
+        const updated = [...(current || [])]
+        updated[existing] = message
+        return updated
+      }
+      return [...(current || []), message]
+    })
   }
 
   const handleAddCustomPair = (pair: CustomTradingPair) => {
