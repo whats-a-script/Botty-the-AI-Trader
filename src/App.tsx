@@ -6,7 +6,7 @@ import { Toaster } from '@/components/ui/sonner'
 import { toast } from 'sonner'
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
-import { Asset, Portfolio } from '@/lib/types'
+import { Asset, Portfolio, AgentConfig, TradingSignal, AgentPerformance } from '@/lib/types'
 import { initializeCoinbaseAssets, fetchCoinbasePrices, COINBASE_ASSETS, updatePriceWithRealData } from '@/lib/coinbase-api'
 import { calculatePortfolioValue, executeTrade, updatePositionPrices } from '@/lib/trading'
 import { PortfolioSummary } from '@/components/PortfolioSummary'
@@ -16,7 +16,12 @@ import { PositionsTable } from '@/components/PositionsTable'
 import { ForecastPanel } from '@/components/ForecastPanel'
 import { TradeHistory } from '@/components/TradeHistory'
 import { PriceChart } from '@/components/PriceChart'
-import { ChartLine, Wallet, Clock, ArrowsClockwise, Spinner, User as UserIcon } from '@phosphor-icons/react'
+import { AgentManager } from '@/components/AgentManager'
+import { SignalsDashboard } from '@/components/SignalsDashboard'
+import { RiskManagement } from '@/components/RiskManagement'
+import { TradeJournal } from '@/components/TradeJournal'
+import { generateTradingSignal, checkStopLossAndTakeProfit, adjustStrategyBasedOnPerformance } from '@/lib/ai-agents'
+import { ChartLine, Wallet, Clock, ArrowsClockwise, Spinner, User as UserIcon, Robot, Shield, BookOpen, Lightning } from '@phosphor-icons/react'
 
 const STARTING_BALANCE = 10000
 
@@ -25,17 +30,33 @@ function App() {
     cash: STARTING_BALANCE,
     positions: [],
     trades: [],
-    startingBalance: STARTING_BALANCE
+    startingBalance: STARTING_BALANCE,
+    maxDrawdown: 0,
+    currentDrawdown: 0,
+    totalPnL: 0
   })
   
   const portfolio = portfolioRaw!
   const setPortfolio = setPortfolioRaw
+
+  const [agentsRaw, setAgentsRaw] = useKV<AgentConfig[]>('ai-agents', [])
+  const agents = agentsRaw || []
+  const setAgents = setAgentsRaw
+
+  const [performanceRaw, setPerformanceRaw] = useKV<Record<string, AgentPerformance>>('agent-performance', {})
+  const performanceMap = new Map(Object.entries(performanceRaw || {}))
+  const setPerformance = (map: Map<string, AgentPerformance>) => {
+    setPerformanceRaw(Object.fromEntries(map))
+  }
 
   const [assets, setAssets] = useState<Asset[]>([])
   const [isLoadingAssets, setIsLoadingAssets] = useState(true)
   const [selectedAsset, setSelectedAsset] = useState<Asset | null>(null)
   const [userInfo, setUserInfo] = useState<Awaited<ReturnType<typeof window.spark.user>> | null>(null)
   const [isLoadingUser, setIsLoadingUser] = useState(true)
+  const [signals, setSignals] = useState<TradingSignal[]>([])
+  const [isGeneratingSignals, setIsGeneratingSignals] = useState(false)
+  const [autoTradeEnabled, setAutoTradeEnabled] = useState(false)
 
   useEffect(() => {
     async function loadUserInfo() {
@@ -107,10 +128,14 @@ function App() {
               cash: STARTING_BALANCE,
               positions: [],
               trades: [],
-              startingBalance: STARTING_BALANCE
+              startingBalance: STARTING_BALANCE,
+              maxDrawdown: 0,
+              currentDrawdown: 0,
+              totalPnL: 0
             }
           }
-          return updatePositionPrices(current, assetPriceMap)
+          const updated = updatePositionPrices(current, assetPriceMap)
+          return checkStopLossAndTakeProfit(updated, assetPriceMap)
         })
       } catch (error) {
         console.error('Error updating prices:', error)
@@ -119,6 +144,61 @@ function App() {
 
     return () => clearInterval(interval)
   }, [assets, setPortfolio])
+
+  useEffect(() => {
+    if (!autoTradeEnabled || agents.length === 0 || assets.length === 0) return
+    if (portfolio.currentDrawdown > 15) {
+      toast.warning('Auto-trading paused: Drawdown limit reached')
+      return
+    }
+
+    const interval = setInterval(async () => {
+      await generateSignalsForAllAgents()
+    }, 60000)
+
+    return () => clearInterval(interval)
+  }, [autoTradeEnabled, agents, assets, portfolio])
+
+  const generateSignalsForAllAgents = async () => {
+    if (isGeneratingSignals) return
+    
+    setIsGeneratingSignals(true)
+    const enabledAgents = agents.filter(a => a.enabled)
+    
+    if (enabledAgents.length === 0) {
+      setIsGeneratingSignals(false)
+      return
+    }
+
+    try {
+      const topAssets = assets.slice(0, 10)
+      const newSignals: TradingSignal[] = []
+
+      for (const agent of enabledAgents) {
+        for (const asset of topAssets) {
+          try {
+            const signal = await generateTradingSignal(asset, agent, portfolio)
+            if (signal.confidence >= 85 && signal.action !== 'hold') {
+              newSignals.push(signal)
+            }
+          } catch (error) {
+            console.error(`Error generating signal for ${agent.name} on ${asset.symbol}:`, error)
+          }
+        }
+      }
+
+      setSignals(newSignals)
+      
+      if (newSignals.length > 0) {
+        toast.success(`Generated ${newSignals.length} high-confidence trading signals`)
+      }
+    } catch (error) {
+      console.error('Error generating signals:', error)
+      toast.error('Failed to generate signals')
+    } finally {
+      setIsGeneratingSignals(false)
+    }
+  }
 
   const currentPrices = new Map(assets.map(a => [a.id, a.currentPrice]))
   const totalValue = portfolio ? calculatePortfolioValue(portfolio, currentPrices) : STARTING_BALANCE
@@ -136,11 +216,26 @@ function App() {
           cash: STARTING_BALANCE,
           positions: [],
           trades: [],
-          startingBalance: STARTING_BALANCE
+          startingBalance: STARTING_BALANCE,
+          maxDrawdown: 0,
+          currentDrawdown: 0,
+          totalPnL: 0
         }
       }
       return executeTrade(current, type, assetId, assetSymbol, quantity, assetPrice)
     })
+    
+    toast.success(`${type === 'buy' ? 'Bought' : 'Sold'} ${quantity} ${assetSymbol}`)
+  }
+
+  const handleExecuteSignal = (signal: TradingSignal) => {
+    const asset = assets.find(a => a.id === signal.assetId)
+    if (!asset) return
+
+    const quantity = signal.suggestedQuantity || 0.01
+    handleTrade(signal.assetId, signal.action as 'buy' | 'sell', quantity)
+    
+    toast.success(`Executed AI signal: ${signal.action} ${asset.symbol} with ${signal.confidence.toFixed(0)}% confidence`)
   }
 
   const handleResetPortfolio = () => {
@@ -148,21 +243,40 @@ function App() {
       cash: STARTING_BALANCE,
       positions: [],
       trades: [],
-      startingBalance: STARTING_BALANCE
+      startingBalance: STARTING_BALANCE,
+      maxDrawdown: 0,
+      currentDrawdown: 0,
+      totalPnL: 0
     })
+    toast.success('Portfolio reset successfully')
+  }
+
+  const handleAgentCreate = (agent: AgentConfig) => {
+    setAgents([...agents, agent])
+    toast.success(`Created agent: ${agent.name}`)
+  }
+
+  const handleAgentUpdate = (updatedAgent: AgentConfig) => {
+    setAgents(agents.map(a => a.id === updatedAgent.id ? updatedAgent : a))
+    toast.info(`Updated agent: ${updatedAgent.name}`)
+  }
+
+  const handleAgentDelete = (agentId: string) => {
+    setAgents(agents.filter(a => a.id !== agentId))
+    toast.info('Agent deleted')
   }
 
   return (
     <div className="min-h-screen bg-background">
       <Toaster />
       
-      <header className="border-b bg-card">
+      <header className="border-b bg-card sticky top-0 z-50">
         <div className="container mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
             <div>
               <h1 className="text-3xl font-bold tracking-tight">AI Trading Simulator</h1>
               <p className="text-sm text-muted-foreground mt-1">
-                Live Coinbase data with AI-powered forecasting
+                Multi-agent AI trading with live Coinbase data
               </p>
             </div>
             
@@ -188,7 +302,7 @@ function App() {
                 <DialogTrigger asChild>
                   <Button variant="outline" size="sm">
                     <ArrowsClockwise className="mr-2" size={16} />
-                    Reset Portfolio
+                    Reset
                   </Button>
                 </DialogTrigger>
                 <DialogContent>
@@ -224,10 +338,12 @@ function App() {
           </div>
         ) : (
           <>
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
-              <PortfolioSummary portfolio={portfolio} totalValue={totalValue} />
+            <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 mb-8">
+              <div className="lg:col-span-1">
+                <PortfolioSummary portfolio={portfolio} totalValue={totalValue} />
+              </div>
               
-              <div className="lg:col-span-2">
+              <div className="lg:col-span-3">
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 max-h-[600px] overflow-y-auto pr-2">
                   {assets.map(asset => (
                     <AssetCard
@@ -246,21 +362,79 @@ function App() {
               </div>
             )}
 
-            <Tabs defaultValue="trade" className="space-y-6">
-              <TabsList className="grid w-full grid-cols-3 lg:w-auto lg:inline-grid">
+            <Tabs defaultValue="agents" className="space-y-6">
+              <TabsList className="grid w-full grid-cols-6 lg:w-auto lg:inline-grid">
+                <TabsTrigger value="agents" className="flex items-center gap-2">
+                  <Robot size={16} />
+                  <span className="hidden sm:inline">Agents</span>
+                </TabsTrigger>
+                <TabsTrigger value="signals" className="flex items-center gap-2">
+                  <Lightning size={16} />
+                  <span className="hidden sm:inline">Signals</span>
+                </TabsTrigger>
+                <TabsTrigger value="risk" className="flex items-center gap-2">
+                  <Shield size={16} />
+                  <span className="hidden sm:inline">Risk</span>
+                </TabsTrigger>
                 <TabsTrigger value="trade" className="flex items-center gap-2">
                   <Wallet size={16} />
                   <span className="hidden sm:inline">Trade</span>
+                </TabsTrigger>
+                <TabsTrigger value="journal" className="flex items-center gap-2">
+                  <BookOpen size={16} />
+                  <span className="hidden sm:inline">Journal</span>
                 </TabsTrigger>
                 <TabsTrigger value="forecast" className="flex items-center gap-2">
                   <ChartLine size={16} />
                   <span className="hidden sm:inline">Forecast</span>
                 </TabsTrigger>
-                <TabsTrigger value="history" className="flex items-center gap-2">
-                  <Clock size={16} />
-                  <span className="hidden sm:inline">History</span>
-                </TabsTrigger>
               </TabsList>
+
+              <TabsContent value="agents" className="space-y-6">
+                <AgentManager
+                  agents={agents}
+                  performance={performanceMap}
+                  onAgentCreate={handleAgentCreate}
+                  onAgentUpdate={handleAgentUpdate}
+                  onAgentDelete={handleAgentDelete}
+                />
+              </TabsContent>
+
+              <TabsContent value="signals" className="space-y-6">
+                <div className="flex items-center justify-between mb-4">
+                  <div>
+                    <h3 className="text-lg font-semibold">AI Trading Signals</h3>
+                    <p className="text-sm text-muted-foreground">
+                      High-confidence signals from your agents
+                    </p>
+                  </div>
+                  <Button 
+                    onClick={generateSignalsForAllAgents}
+                    disabled={isGeneratingSignals || agents.filter(a => a.enabled).length === 0}
+                  >
+                    {isGeneratingSignals ? (
+                      <>
+                        <Spinner className="mr-2 animate-spin" size={16} />
+                        Analyzing...
+                      </>
+                    ) : (
+                      <>
+                        <Lightning className="mr-2" size={16} />
+                        Generate Signals
+                      </>
+                    )}
+                  </Button>
+                </div>
+                <SignalsDashboard 
+                  signals={signals}
+                  assets={assets}
+                  onExecuteSignal={handleExecuteSignal}
+                />
+              </TabsContent>
+
+              <TabsContent value="risk">
+                <RiskManagement portfolio={portfolio} totalValue={totalValue} />
+              </TabsContent>
 
               <TabsContent value="trade" className="space-y-6">
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -275,12 +449,12 @@ function App() {
                 </div>
               </TabsContent>
 
-              <TabsContent value="forecast">
-                <ForecastPanel assets={assets} />
+              <TabsContent value="journal">
+                <TradeJournal trades={portfolio.trades} portfolio={portfolio} />
               </TabsContent>
 
-              <TabsContent value="history">
-                <TradeHistory trades={portfolio.trades} />
+              <TabsContent value="forecast">
+                <ForecastPanel assets={assets} />
               </TabsContent>
             </Tabs>
           </>
