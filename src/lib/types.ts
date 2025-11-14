@@ -62,6 +62,7 @@ export interface Forecast {
 }
 
 export type TradingMode = 'conservative' | 'moderate' | 'aggressive'
+export type HoldingMode = 'scalping' | 'short' | 'long'
 export type AgentType = 'single' | 'multi'
 export type AIModel = 'gpt-4o' | 'gpt-4o-mini' | 'gemini' | 'deepseek' | 'qwen'
 
@@ -83,6 +84,7 @@ export interface AgentConfig {
   name: string
   model: AIModel
   mode: TradingMode
+  holdingMode: HoldingMode
   enabled: boolean
   maxLeverage: number
   maxPositionSize: number

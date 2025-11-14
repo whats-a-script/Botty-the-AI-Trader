@@ -44,7 +44,12 @@ function App() {
   const setPortfolio = setPortfolioRaw
 
   const [agentsRaw, setAgentsRaw] = useKV<AgentConfig[]>('ai-agents', [])
-  const agents = agentsRaw || []
+  const agents = (agentsRaw || []).map(agent => {
+    if (!agent.holdingMode) {
+      return { ...agent, holdingMode: 'short' as const }
+    }
+    return agent
+  })
   const setAgents = setAgentsRaw
 
   const [performanceRaw, setPerformanceRaw] = useKV<Record<string, AgentPerformance>>('agent-performance', {})

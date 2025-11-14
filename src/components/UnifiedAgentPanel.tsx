@@ -8,7 +8,7 @@ import { Progress } from '@/components/ui/progress'
 import { Switch } from '@/components/ui/switch'
 import { Asset, AgentConfig, Portfolio } from '@/lib/types'
 import { getUnifiedAgentDecision, UnifiedAgentDecision } from '@/lib/unified-agent'
-import { Robot, CheckCircle, Warning, Clock, TrendUp, TrendDown, Minus, Lightning, Play, Stop } from '@phosphor-icons/react'
+import { Robot, CheckCircle, Warning, Clock, TrendUp, TrendDown, Minus, Lightning, Play, Stop, ChartLine } from '@phosphor-icons/react'
 import { toast } from 'sonner'
 
 interface UnifiedAgentPanelProps {
@@ -153,6 +153,25 @@ export function UnifiedAgentPanel({ assets, agents, portfolio, autoTradeEnabled,
                   <div className="text-muted-foreground">Max Drawdown</div>
                   <div className="font-medium">15%</div>
                 </div>
+              </div>
+            </div>
+          )}
+
+          {enabledAgents.length > 0 && (
+            <div>
+              <div className="text-sm font-medium mb-2">Active Agents</div>
+              <div className="flex flex-wrap gap-2">
+                {enabledAgents.map(agent => (
+                  <Badge key={agent.id} variant="secondary" className="flex items-center gap-1.5 px-2 py-1">
+                    <Robot size={12} />
+                    <span>{agent.name}</span>
+                    <span className="text-xs opacity-70">•</span>
+                    {agent.holdingMode === 'scalping' && <Lightning size={12} className="text-amber-500" weight="fill" />}
+                    {agent.holdingMode === 'short' && <Clock size={12} className="text-blue-500" weight="fill" />}
+                    {agent.holdingMode === 'long' && <ChartLine size={12} className="text-green-500" weight="fill" />}
+                    <span className="text-xs capitalize">{agent.holdingMode}</span>
+                  </Badge>
+                ))}
               </div>
             </div>
           )}

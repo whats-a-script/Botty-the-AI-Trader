@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { AgentConfig, TradingMode, AIModel, AgentPerformance } from '@/lib/types'
+import { AgentConfig, TradingMode, HoldingMode, AIModel, AgentPerformance } from '@/lib/types'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -8,7 +8,7 @@ import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Input } from '@/components/ui/input'
 import { Slider } from '@/components/ui/slider'
-import { Robot, Play, Pause, Trash, TrendUp, TrendDown } from '@phosphor-icons/react'
+import { Robot, Play, Pause, Trash, TrendUp, TrendDown, Lightning, Clock, ChartLine } from '@phosphor-icons/react'
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
 
 interface AgentManagerProps {
@@ -31,6 +31,7 @@ export function AgentManager({
     name: '',
     model: 'gpt-4o-mini',
     mode: 'moderate',
+    holdingMode: 'short',
     enabled: true,
     maxLeverage: 3,
     maxPositionSize: 10,
@@ -49,6 +50,7 @@ export function AgentManager({
       name: newAgent.name,
       model: newAgent.model as AIModel,
       mode: newAgent.mode as TradingMode,
+      holdingMode: newAgent.holdingMode as HoldingMode,
       enabled: newAgent.enabled || true,
       maxLeverage: newAgent.maxLeverage || 3,
       maxPositionSize: newAgent.maxPositionSize || 10,
@@ -65,6 +67,7 @@ export function AgentManager({
       name: '',
       model: 'gpt-4o-mini',
       mode: 'moderate',
+      holdingMode: 'short',
       enabled: true,
       maxLeverage: 3,
       maxPositionSize: 10,
@@ -147,6 +150,23 @@ export function AgentManager({
                     </SelectContent>
                   </Select>
                 </div>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="holding-mode">Holding Mode</Label>
+                <Select 
+                  value={newAgent.holdingMode} 
+                  onValueChange={(value) => setNewAgent({ ...newAgent, holdingMode: value as HoldingMode })}
+                >
+                  <SelectTrigger id="holding-mode">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="scalping">Scalping (Seconds-Minutes)</SelectItem>
+                    <SelectItem value="short">Short Hold (Hours-Days)</SelectItem>
+                    <SelectItem value="long">Long Hold (Weeks-Months)</SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
 
               <div className="space-y-2">
@@ -242,7 +262,7 @@ export function AgentManager({
                       {agent.name}
                     </CardTitle>
                     <CardDescription>
-                      {agent.model} • {agent.mode}
+                      {agent.model} • {agent.mode} • {agent.holdingMode}
                     </CardDescription>
                   </div>
                   <Switch
@@ -278,6 +298,15 @@ export function AgentManager({
                 )}
 
                 <div className="pt-2 border-t space-y-1">
+                  <div className="flex justify-between text-xs text-muted-foreground">
+                    <span>Holding Mode</span>
+                    <div className="flex items-center gap-1">
+                      {agent.holdingMode === 'scalping' && <Lightning size={12} weight="fill" className="text-amber-500" />}
+                      {agent.holdingMode === 'short' && <Clock size={12} weight="fill" className="text-blue-500" />}
+                      {agent.holdingMode === 'long' && <ChartLine size={12} weight="fill" className="text-green-500" />}
+                      <span className="capitalize">{agent.holdingMode}</span>
+                    </div>
+                  </div>
                   <div className="flex justify-between text-xs text-muted-foreground">
                     <span>Leverage</span>
                     <span>{agent.maxLeverage}x</span>

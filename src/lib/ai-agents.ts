@@ -1,4 +1,4 @@
-import { Asset, TradingSignal, AgentConfig, TradingMode, AIModel, MultiModelAnalysis, Portfolio } from './types'
+import { Asset, TradingSignal, AgentConfig, TradingMode, HoldingMode, AIModel, MultiModelAnalysis, Portfolio } from './types'
 import { calculateRSI, detectTrend, calculateMomentum, calculateVolatilityTrend, calculateSupportResistance } from './technical-indicators'
 
 export async function generateTradingSignal(
@@ -16,7 +16,9 @@ export async function generateTradingSignal(
   const supportResistance = calculateSupportResistance(recentHistory, currentPrice)
 
   const modeParams = getModeParameters(config.mode)
+  const holdingParams = getHoldingModeParameters(config.holdingMode)
   const criteriaText = modeParams.criteria.join('\n')
+  const holdingCriteriaText = holdingParams.criteria.join('\n')
   const currentPriceStr = (isFinite(currentPrice) ? currentPrice : 0).toFixed(4)
   const rsiStr = (isFinite(rsi) ? rsi : 50).toFixed(2)
   const momentumStr = (isFinite(momentum) ? momentum : 0).toFixed(2)
@@ -33,6 +35,9 @@ export async function generateTradingSignal(
 
 TRADING MODE: ${config.mode.toUpperCase()}
 ${modeParams.description}
+
+HOLDING MODE: ${config.holdingMode.toUpperCase()}
+${holdingParams.description}
 
 ASSET: ${asset.name} (${asset.symbol})
 Current Price: $${currentPriceStr}
@@ -58,18 +63,25 @@ RISK PARAMETERS:
 - Risk/Reward Ratio: ${config.riskRewardRatio}:1
 - Volatility Threshold: ${config.volatilityThreshold}%
 
+TRADING MODE CRITERIA:
+${criteriaText}
+
+HOLDING MODE CRITERIA (${config.holdingMode}):
+${holdingCriteriaText}
+
 DECISION CRITERIA FOR HIGH CONFIDENCE (70%+):
-1. ${criteriaText}
-2. Clear technical setup with 4+ aligned indicators
-3. Risk/reward ratio meets or exceeds target
-4. Volatility within acceptable range
-5. Position sizing appropriate for account
+1. All trading mode criteria met
+2. Holding mode timeframe matches market conditions
+3. Clear technical setup with 4+ aligned indicators
+4. Risk/reward ratio meets or exceeds target
+5. Volatility within acceptable range
+6. Position sizing appropriate for account
 
 Analyze and provide a trading decision. Return valid JSON:
 {
   "action": "buy|sell|hold|close",
   "confidence": <70-95 for strong setups, lower otherwise>,
-  "reasoning": "<specific technical reasons>",
+  "reasoning": "<specific technical reasons and timeframe alignment>",
   "positionType": "long|short",
   "suggestedQuantity": <appropriate position size>,
   "takeProfit": <price level>,
@@ -77,7 +89,7 @@ Analyze and provide a trading decision. Return valid JSON:
   "leverage": <1-${config.maxLeverage} based on confidence>
 }
 
-Be conservative. High confidence requires clear evidence.`
+Be conservative. High confidence requires clear evidence AND alignment with ${config.holdingMode} timeframe.`
 
   try {
     const response = await window.spark.llm(promptText, getModelName(config.model), true)
@@ -251,6 +263,47 @@ function getModeParameters(mode: TradingMode) {
           'Higher volatility acceptable',
           'Tight stop losses',
           'Higher leverage allowed (up to 10x)'
+        ]
+      }
+  }
+}
+
+function getHoldingModeParameters(holdingMode: HoldingMode) {
+  switch (holdingMode) {
+    case 'scalping':
+      return {
+        description: 'Ultra-short timeframe (seconds to minutes). Focus on quick profits from small price movements.',
+        criteria: [
+          'Look for high liquidity and tight spreads',
+          'Enter and exit rapidly on momentum',
+          'Target 0.5-2% moves with tight stops',
+          'High frequency, multiple trades per day',
+          'Prioritize quick technical signals over fundamentals',
+          'Use 1-5 minute candles for analysis'
+        ]
+      }
+    case 'short':
+      return {
+        description: 'Short-term holding (hours to days). Capitalize on intraday and swing movements.',
+        criteria: [
+          'Balance technical and fundamental factors',
+          'Hold positions through minor pullbacks',
+          'Target 3-8% moves with moderate stops',
+          'Multiple trades per week',
+          'Use 15min-4hour candles for analysis',
+          'Monitor key support/resistance levels'
+        ]
+      }
+    case 'long':
+      return {
+        description: 'Long-term holding (weeks to months). Focus on major trend movements.',
+        criteria: [
+          'Prioritize strong fundamental catalysts',
+          'Ride major trends with conviction',
+          'Target 15%+ moves with wide stops',
+          'Fewer, higher conviction trades',
+          'Use daily/weekly candles for analysis',
+          'Ignore minor price fluctuations'
         ]
       }
   }
