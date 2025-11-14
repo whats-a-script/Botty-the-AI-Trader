@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button'
 import { Toaster } from '@/components/ui/sonner'
 import { toast } from 'sonner'
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Asset, Portfolio } from '@/lib/types'
 import { initializeCoinbaseAssets, fetchCoinbasePrices, COINBASE_ASSETS, updatePriceWithRealData } from '@/lib/coinbase-api'
 import { calculatePortfolioValue, executeTrade, updatePositionPrices } from '@/lib/trading'
@@ -15,7 +16,7 @@ import { PositionsTable } from '@/components/PositionsTable'
 import { ForecastPanel } from '@/components/ForecastPanel'
 import { TradeHistory } from '@/components/TradeHistory'
 import { PriceChart } from '@/components/PriceChart'
-import { ChartLine, Wallet, Clock, ArrowsClockwise, Spinner } from '@phosphor-icons/react'
+import { ChartLine, Wallet, Clock, ArrowsClockwise, Spinner, User as UserIcon } from '@phosphor-icons/react'
 
 const STARTING_BALANCE = 10000
 
@@ -33,6 +34,25 @@ function App() {
   const [assets, setAssets] = useState<Asset[]>([])
   const [isLoadingAssets, setIsLoadingAssets] = useState(true)
   const [selectedAsset, setSelectedAsset] = useState<Asset | null>(null)
+  const [userInfo, setUserInfo] = useState<User | null>(null)
+  const [isLoadingUser, setIsLoadingUser] = useState(true)
+
+  useEffect(() => {
+    async function loadUserInfo() {
+      try {
+        setIsLoadingUser(true)
+        const user = await window.spark.user()
+        setUserInfo(user)
+      } catch (error) {
+        console.error('Error loading user info:', error)
+        toast.error('Failed to load account info')
+      } finally {
+        setIsLoadingUser(false)
+      }
+    }
+    
+    loadUserInfo()
+  }, [])
 
   useEffect(() => {
     async function loadCoinbaseData() {
@@ -146,28 +166,47 @@ function App() {
               </p>
             </div>
             
-            <Dialog>
-              <DialogTrigger asChild>
-                <Button variant="outline" size="sm">
-                  <ArrowsClockwise className="mr-2" size={16} />
-                  Reset Portfolio
-                </Button>
-              </DialogTrigger>
-              <DialogContent>
-                <DialogHeader>
-                  <DialogTitle>Reset Portfolio?</DialogTitle>
-                  <DialogDescription>
-                    This will clear all positions and trades, and reset your balance to ${STARTING_BALANCE.toFixed(2)}.
-                    This action cannot be undone.
-                  </DialogDescription>
-                </DialogHeader>
-                <DialogFooter>
-                  <Button variant="destructive" onClick={handleResetPortfolio}>
+            <div className="flex items-center gap-3">
+              {!isLoadingUser && userInfo && (
+                <div className="flex items-center gap-3 px-4 py-2 rounded-lg bg-muted/50">
+                  <Avatar className="h-8 w-8">
+                    <AvatarImage src={userInfo.avatarUrl} alt={userInfo.login} />
+                    <AvatarFallback>
+                      <UserIcon size={16} />
+                    </AvatarFallback>
+                  </Avatar>
+                  <div className="hidden sm:block text-sm">
+                    <div className="font-medium">{userInfo.login}</div>
+                    {userInfo.email && (
+                      <div className="text-xs text-muted-foreground">{userInfo.email}</div>
+                    )}
+                  </div>
+                </div>
+              )}
+              
+              <Dialog>
+                <DialogTrigger asChild>
+                  <Button variant="outline" size="sm">
+                    <ArrowsClockwise className="mr-2" size={16} />
                     Reset Portfolio
                   </Button>
-                </DialogFooter>
-              </DialogContent>
-            </Dialog>
+                </DialogTrigger>
+                <DialogContent>
+                  <DialogHeader>
+                    <DialogTitle>Reset Portfolio?</DialogTitle>
+                    <DialogDescription>
+                      This will clear all positions and trades, and reset your balance to ${STARTING_BALANCE.toFixed(2)}.
+                      This action cannot be undone.
+                    </DialogDescription>
+                  </DialogHeader>
+                  <DialogFooter>
+                    <Button variant="destructive" onClick={handleResetPortfolio}>
+                      Reset Portfolio
+                    </Button>
+                  </DialogFooter>
+                </DialogContent>
+              </Dialog>
+            </div>
           </div>
         </div>
       </header>

@@ -12,6 +12,13 @@ An AI-powered trading simulator that helps users learn trading strategies throug
 
 ## Essential Features
 
+### Account Information Display
+- **Functionality**: Displays current user's GitHub account information including avatar, username, and email
+- **Purpose**: Personalizes the trading simulator experience and provides account context
+- **Trigger**: Automatic on app load
+- **Progression**: App loads → Fetch user info from spark.user() → Display avatar and username in header → Show email on hover
+- **Success criteria**: Account info loads within 2 seconds and displays in header with avatar
+
 ### AI Price Forecasting
 - **Functionality**: Generates short-term price predictions for selected assets using AI pattern analysis
 - **Purpose**: Helps users understand predictive modeling and its limitations in trading
