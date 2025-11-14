@@ -34,7 +34,7 @@ function App() {
   const [assets, setAssets] = useState<Asset[]>([])
   const [isLoadingAssets, setIsLoadingAssets] = useState(true)
   const [selectedAsset, setSelectedAsset] = useState<Asset | null>(null)
-  const [userInfo, setUserInfo] = useState<User | null>(null)
+  const [userInfo, setUserInfo] = useState<Awaited<ReturnType<typeof window.spark.user>> | null>(null)
   const [isLoadingUser, setIsLoadingUser] = useState(true)
 
   useEffect(() => {
