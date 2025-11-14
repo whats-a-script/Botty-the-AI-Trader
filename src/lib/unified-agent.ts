@@ -172,8 +172,7 @@ User Question: "${question}"
 
 Provide a concise, specific answer from your perspective as a ${agent.mode} trader. Be actionable and reference specific assets or strategies when relevant. Keep your response to 2-3 sentences.`
 
-        const prompt = window.spark.llmPrompt([promptText] as any)
-        const response = await window.spark.llm(prompt, 'gpt-4o-mini')
+        const response = await window.spark.llm(promptText, 'gpt-4o-mini')
         
         return {
           agentName: agent.name,
@@ -212,11 +211,9 @@ Agent Responses:
 ${validContributions.map(c => `- ${c.agentName}: ${c.response}`).join('\n')}
 
 Synthesize these responses into one coherent, actionable answer that represents the unified perspective of all agents. If agents disagree, acknowledge the different viewpoints. Be specific and direct. Keep to 3-4 sentences.`
-
-  const consensusPrompt = window.spark.llmPrompt([consensusPromptText] as any)
   
   try {
-    const unifiedAnswer = await window.spark.llm(consensusPrompt, 'gpt-4o')
+    const unifiedAnswer = await window.spark.llm(consensusPromptText, 'gpt-4o')
     
     return {
       answer: unifiedAnswer.trim(),
