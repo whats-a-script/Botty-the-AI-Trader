@@ -22,8 +22,10 @@ import { RiskManagement } from '@/components/RiskManagement'
 import { TradeJournal } from '@/components/TradeJournal'
 import { AgentCommunication } from '@/components/AgentCommunication'
 import { CustomPairs } from '@/components/CustomPairs'
+import { UnifiedAgentPanel } from '@/components/UnifiedAgentPanel'
 import { generateTradingSignal, checkStopLossAndTakeProfit, adjustStrategyBasedOnPerformance } from '@/lib/ai-agents'
-import { ChartLine, Wallet, Clock, ArrowsClockwise, Spinner, User as UserIcon, Robot, Shield, BookOpen, Lightning, Chats, Coin } from '@phosphor-icons/react'
+import { getUnifiedAgentDecision } from '@/lib/unified-agent'
+import { ChartLine, Wallet, Clock, ArrowsClockwise, Spinner, User as UserIcon, Robot, Shield, BookOpen, Lightning, Chats, Coin, UsersThree } from '@phosphor-icons/react'
 
 const STARTING_BALANCE = 10000
 
@@ -202,23 +204,26 @@ function App() {
       const topAssets = assets.slice(0, 10)
       const newSignals: TradingSignal[] = []
 
-      for (const agent of enabledAgents) {
-        for (const asset of topAssets) {
-          try {
-            const signal = await generateTradingSignal(asset, agent, portfolio)
-            if (signal.confidence >= 85 && signal.action !== 'hold') {
-              newSignals.push(signal)
-            }
-          } catch (error) {
-            console.error(`Error generating signal for ${agent.name} on ${asset.symbol}:`, error)
+      for (const asset of topAssets) {
+        try {
+          const unifiedDecision = await getUnifiedAgentDecision(asset, enabledAgents, portfolio)
+          
+          if (unifiedDecision.signal.confidence >= 80 && 
+              unifiedDecision.signal.action !== 'hold' &&
+              unifiedDecision.executionRecommendation === 'execute') {
+            newSignals.push(unifiedDecision.signal)
           }
+        } catch (error) {
+          console.error(`Error generating unified signal for ${asset.symbol}:`, error)
         }
       }
 
       setSignals(newSignals)
       
       if (newSignals.length > 0) {
-        toast.success(`Generated ${newSignals.length} high-confidence trading signals`)
+        toast.success(`Unified agents generated ${newSignals.length} high-confidence signals`)
+      } else {
+        toast.info('No strong signals found - agents recommend waiting')
       }
     } catch (error) {
       console.error('Error generating signals:', error)
@@ -330,7 +335,7 @@ function App() {
             <div>
               <h1 className="text-3xl font-bold tracking-tight">AI Trading Simulator</h1>
               <p className="text-sm text-muted-foreground mt-1">
-                Multi-agent AI trading with live Coinbase data
+                Unified multi-agent AI trading with live Coinbase data
               </p>
             </div>
             
@@ -416,8 +421,12 @@ function App() {
               </div>
             )}
 
-            <Tabs defaultValue="agents" className="space-y-6">
-              <TabsList className="grid w-full grid-cols-4 md:grid-cols-8 lg:w-auto lg:inline-grid">
+            <Tabs defaultValue="unified" className="space-y-6">
+              <TabsList className="grid w-full grid-cols-4 md:grid-cols-9 lg:w-auto lg:inline-grid">
+                <TabsTrigger value="unified" className="flex items-center gap-2">
+                  <UsersThree size={16} />
+                  <span className="hidden sm:inline">Unified</span>
+                </TabsTrigger>
                 <TabsTrigger value="agents" className="flex items-center gap-2">
                   <Robot size={16} />
                   <span className="hidden sm:inline">Agents</span>
@@ -452,6 +461,15 @@ function App() {
                 </TabsTrigger>
               </TabsList>
 
+              <TabsContent value="unified" className="space-y-6">
+                <UnifiedAgentPanel
+                  assets={assets}
+                  agents={agents}
+                  portfolio={portfolio}
+                  onExecuteSignal={handleTrade}
+                />
+              </TabsContent>
+
               <TabsContent value="agents" className="space-y-6">
                 <AgentManager
                   agents={agents}
@@ -484,9 +502,9 @@ function App() {
               <TabsContent value="signals" className="space-y-6">
                 <div className="flex items-center justify-between mb-4">
                   <div>
-                    <h3 className="text-lg font-semibold">AI Trading Signals</h3>
+                    <h3 className="text-lg font-semibold">Unified Agent Signals</h3>
                     <p className="text-sm text-muted-foreground">
-                      High-confidence signals from your agents
+                      All agents work together to generate consensus trading signals
                     </p>
                   </div>
                   <Button 
@@ -501,7 +519,7 @@ function App() {
                     ) : (
                       <>
                         <Lightning className="mr-2" size={16} />
-                        Generate Signals
+                        Generate Unified Signals
                       </>
                     )}
                   </Button>

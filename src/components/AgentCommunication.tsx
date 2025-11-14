@@ -6,8 +6,9 @@ import { Badge } from '@/components/ui/badge'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Input } from '@/components/ui/input'
-import { Chats, ArrowRight, ThumbsUp, ThumbsDown, Minus, PaperPlaneRight, User, Robot } from '@phosphor-icons/react'
+import { Chats, ArrowRight, ThumbsUp, ThumbsDown, Minus, PaperPlaneRight, User, Robot, CheckCircle } from '@phosphor-icons/react'
 import { initiateAgentDiscussion, broadcastSignalToAgents } from '@/lib/agent-communication'
+import { askUnifiedAgent } from '@/lib/unified-agent'
 import { toast } from 'sonner'
 
 interface AgentCommunicationProps {
@@ -82,48 +83,15 @@ export function AgentCommunication({
     setIsAskingAgents(true)
     
     try {
-      const responses = await Promise.all(
-        communicatingAgents.map(async (agent) => {
-          try {
-            const portfolioContext = `Portfolio Context:
-- Cash: $${portfolio.cash.toFixed(2)}
-- Positions: ${portfolio.positions.length}
-- Total P&L: $${portfolio.totalPnL.toFixed(2)}`
-
-            const marketContext = `Market Context:
-- Top Assets: ${assets.slice(0, 5).map(a => `${a.symbol} ($${a.currentPrice.toFixed(2)})`).join(', ')}`
-
-            const prompt = `You are ${agent.name}, a trading agent with ${agent.mode} mode.
-
-${portfolioContext}
-
-${marketContext}
-
-User Question: "${currentQuestion}"
-
-Provide a helpful, concise response from your agent's perspective. Be specific and actionable when possible.`
-
-            const response = await window.spark.llm(prompt, 'gpt-4o-mini')
-            
-            return {
-              agentId: agent.id,
-              agentName: agent.name,
-              response: response.trim(),
-              agreement: 'neutral' as const,
-              timestamp: Date.now()
-            }
-          } catch (error) {
-            console.error(`Error getting response from ${agent.name}:`, error)
-            return {
-              agentId: agent.id,
-              agentName: agent.name,
-              response: 'Unable to respond at this time.',
-              agreement: 'neutral' as const,
-              timestamp: Date.now()
-            }
-          }
-        })
-      )
+      const result = await askUnifiedAgent(currentQuestion, communicatingAgents, assets, portfolio)
+      
+      const responses = result.agentContributions.map(contrib => ({
+        agentId: contrib.agentName.toLowerCase().replace(/\s+/g, '-'),
+        agentName: contrib.agentName,
+        response: contrib.response,
+        agreement: 'neutral' as const,
+        timestamp: Date.now()
+      }))
 
       const updatedUserMessage: AgentMessage = {
         ...userMessage,
@@ -131,8 +99,20 @@ Provide a helpful, concise response from your agent's perspective. Be specific a
       }
 
       onNewMessage(updatedUserMessage)
+
+      const unifiedMessage: AgentMessage = {
+        id: `unified-${Date.now()}`,
+        fromAgentId: 'unified-agent',
+        fromAgentName: 'Unified Agent',
+        content: result.answer,
+        timestamp: Date.now() + 1,
+        messageType: 'consensus',
+        responses: []
+      }
+
+      onNewMessage(unifiedMessage)
       
-      toast.success(`Received ${responses.length} agent response${responses.length !== 1 ? 's' : ''}`)
+      toast.success(`Unified response from ${result.agentContributions.length} agents`)
     } catch (error) {
       console.error('Error asking agents:', error)
       toast.error('Failed to get agent responses')
@@ -176,17 +156,17 @@ Provide a helpful, concise response from your agent's perspective. Be specific a
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Chats size={24} />
-            Agent Communication
+            Unified Agent Communication
           </CardTitle>
           <CardDescription>
-            Ask your agents questions or enable discussions on trading decisions
+            All agents work together as one unified intelligence to answer questions and analyze trades
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="flex items-center gap-2 p-3 bg-muted/50 rounded-lg">
-            <Robot size={20} className="text-accent" />
+            <CheckCircle size={20} className="text-success" weight="fill" />
             <span className="text-sm font-medium">
-              {communicatingAgents.length} active agent{communicatingAgents.length !== 1 ? 's' : ''}
+              Unified Agent Mode: {communicatingAgents.length} agent{communicatingAgents.length !== 1 ? 's' : ''} working together
             </span>
             {communicatingAgents.length > 0 && (
               <span className="text-xs text-muted-foreground">
@@ -196,11 +176,14 @@ Provide a helpful, concise response from your agent's perspective. Be specific a
           </div>
 
           <div className="space-y-2">
-            <label className="text-sm font-medium">Ask your agents</label>
+            <label className="text-sm font-medium">Ask the unified agent</label>
+            <p className="text-xs text-muted-foreground">
+              Your question will be analyzed by all enabled agents working together to provide a unified answer
+            </p>
             <div className="flex gap-2">
               <Input
                 id="user-question-input"
-                placeholder="Ask about market conditions, strategy, or get trading advice..."
+                placeholder="e.g., 'With the upcoming XRP ETF, what position is recommended?'"
                 value={userQuestion}
                 onChange={(e) => setUserQuestion(e.target.value)}
                 onKeyPress={handleKeyPress}
