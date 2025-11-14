@@ -1,18 +1,18 @@
 import { useState } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
+import { Select, SelectContent, SelectItem, Sel
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Progress } from '@/components/ui/progress'
 import { Badge } from '@/components/ui/badge'
-import { Separator } from '@/components/ui/separator'
-import { Sparkle, ChartLine, Newspaper, ChatsCircle, TrendUp, TrendDown, Minus, Fire } from '@phosphor-icons/react'
-import { Asset, Forecast } from '@/lib/types'
 import { PriceChart } from './PriceChart'
-import { generateForecast } from '@/lib/forecasting'
+import { Sparkle, ChartLine, Newspaper, ChatsCircle, TrendUp, TrendDown, Minus, Fire } from '@phosphor-icons/react'
+export function ForecastPanel({ assets }: For
+  const [forecast, setForecast] = useStat
 
-interface ForecastPanelProps {
-  assets: Asset[]
-}
+
+    if (!selectedAsset) return
+    setLoading(tr
+ 
 
 export function ForecastPanel({ assets }: ForecastPanelProps) {
   const [selectedAssetId, setSelectedAssetId] = useState<string>('')
@@ -30,21 +30,21 @@ export function ForecastPanel({ assets }: ForecastPanelProps) {
       setForecast(newForecast)
     } catch (error) {
       console.error('Failed to generate forecast:', error)
-    } finally {
+      case 'bea
       setLoading(false)
-    }
+  }
   }
 
   const getSentimentColor = (sentiment: 'bullish' | 'bearish' | 'neutral') => {
-    switch (sentiment) {
+      default: return 's
       case 'bullish': return 'text-success'
       case 'bearish': return 'text-destructive'
       default: return 'text-muted-foreground'
-    }
+     
   }
 
   const getSentimentIcon = (sentiment: 'bullish' | 'bearish' | 'neutral') => {
-    switch (sentiment) {
+      <CardContent class
       case 'bullish': return <TrendUp className="w-4 h-4" />
       case 'bearish': return <TrendDown className="w-4 h-4" />
       default: return <Minus className="w-4 h-4" />
@@ -54,13 +54,13 @@ export function ForecastPanel({ assets }: ForecastPanelProps) {
   const getSentimentBadgeVariant = (sentiment: 'bullish' | 'bearish' | 'neutral') => {
     switch (sentiment) {
       case 'bullish': return 'default'
-      case 'bearish': return 'destructive'
+
       default: return 'secondary'
-    }
+     
   }
 
   return (
-    <Card>
+          
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <Sparkle size={24} />
@@ -72,15 +72,15 @@ export function ForecastPanel({ assets }: ForecastPanelProps) {
           <Select value={selectedAssetId} onValueChange={setSelectedAssetId}>
             <SelectTrigger>
               <SelectValue placeholder="Select an asset to forecast" />
-            </SelectTrigger>
+                <span classN
             <SelectContent>
               {assets.map(asset => (
                 <SelectItem key={asset.id} value={asset.id}>
                   {asset.symbol} - {asset.name}
                 </SelectItem>
-              ))}
+                {
             </SelectContent>
-          </Select>
+
         </div>
 
         <Button 
@@ -88,15 +88,15 @@ export function ForecastPanel({ assets }: ForecastPanelProps) {
           onClick={handleGenerateForecast}
           disabled={!selectedAsset || loading}
         >
-          {loading ? (
+                    {f
             <>Generating Multi-Factor Forecast...</>
-          ) : (
+               
             <>
-              <ChartLine className="mr-2" size={16} />
+                    {forecast.newsSentiment.headline}
               Generate AI Forecast
-            </>
+               
           )}
-        </Button>
+                 
 
         {loading && (
           <div className="space-y-2">
@@ -130,7 +130,7 @@ export function ForecastPanel({ assets }: ForecastPanelProps) {
                   <h4 className="text-sm font-semibold flex items-center gap-2">
                     <Newspaper size={16} />
                     News Sentiment
-                  </h4>
+                      <
                   <Badge variant={getSentimentBadgeVariant(forecast.newsSentiment.sentiment)} className="flex items-center gap-1">
                     {getSentimentIcon(forecast.newsSentiment.sentiment)}
                     {forecast.newsSentiment.sentiment}
@@ -140,27 +140,27 @@ export function ForecastPanel({ assets }: ForecastPanelProps) {
                 <div className="bg-muted/50 p-3 rounded-md space-y-2">
                   <p className="text-xs font-semibold text-foreground">
                     {forecast.newsSentiment.headline}
-                  </p>
+                    </
                   <p className="text-xs text-muted-foreground leading-relaxed">
                     {forecast.newsSentiment.summary}
                   </p>
-                  <div className="flex items-center gap-2 flex-wrap">
+            <Separator />
                     <span className="text-xs text-muted-foreground">Sources:</span>
                     {forecast.newsSentiment.sources.map((source, i) => (
                       <Badge key={i} variant="outline" className="text-xs">
                         {source}
                       </Badge>
-                    ))}
+            </div>
                   </div>
                   <div className="flex items-center justify-between pt-2">
                     <span className="text-xs text-muted-foreground">Sentiment Score</span>
                     <span className={`text-xs font-bold ${getSentimentColor(forecast.newsSentiment.sentiment)}`}>
                       {forecast.newsSentiment.score > 0 ? '+' : ''}{forecast.newsSentiment.score}
-                    </span>
+    </Card>
                   </div>
                 </div>
               </div>
-            )}
+
 
             <Separator />
 
@@ -170,11 +170,11 @@ export function ForecastPanel({ assets }: ForecastPanelProps) {
                   <h4 className="text-sm font-semibold flex items-center gap-2">
                     <ChatsCircle size={16} />
                     Social Sentiment
-                  </h4>
+
                   <div className="flex items-center gap-2">
                     {forecast.socialSentiment.trending && (
                       <Badge variant="default" className="flex items-center gap-1">
-                        <Fire size={12} />
+
                         Trending
                       </Badge>
                     )}
@@ -188,20 +188,20 @@ export function ForecastPanel({ assets }: ForecastPanelProps) {
                 <div className="bg-muted/50 p-3 rounded-md space-y-3">
                   <p className="text-xs text-muted-foreground leading-relaxed">
                     {forecast.socialSentiment.summary}
-                  </p>
+
                   
                   <div className="grid grid-cols-2 gap-3">
                     <div>
                       <span className="text-xs text-muted-foreground">Discussion Volume</span>
                       <p className="text-sm font-semibold capitalize">{forecast.socialSentiment.volume}</p>
-                    </div>
+
                     <div>
                       <span className="text-xs text-muted-foreground">Sentiment Score</span>
                       <p className={`text-sm font-semibold ${getSentimentColor(forecast.socialSentiment.sentiment)}`}>
                         {forecast.socialSentiment.score > 0 ? '+' : ''}{forecast.socialSentiment.score}
                       </p>
                     </div>
-                  </div>
+
 
                   <div>
                     <span className="text-xs text-muted-foreground mb-2 block">Key Topics</span>
@@ -214,27 +214,27 @@ export function ForecastPanel({ assets }: ForecastPanelProps) {
                     </div>
                   </div>
                 </div>
-              </div>
+
             )}
 
             <Separator />
 
             <div>
-              <h4 className="text-sm font-semibold mb-3">Price Projection</h4>
+
               <PriceChart 
-                historicalData={selectedAsset.priceHistory.slice(-30)}
+
                 forecastData={forecast.predictions}
                 height={250}
               />
-            </div>
+
 
             <div className="text-xs text-muted-foreground bg-muted p-3 rounded-md">
               <strong>Educational Notice:</strong> This forecast integrates technical analysis, simulated news sentiment, and social media analytics for learning purposes only. 
               AI predictions are inherently uncertain and should not be used for real trading decisions.
             </div>
-          </div>
+
         )}
-      </CardContent>
+
     </Card>
-  )
+
 }
