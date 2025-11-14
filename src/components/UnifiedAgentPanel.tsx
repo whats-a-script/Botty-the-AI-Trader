@@ -37,7 +37,7 @@ export function UnifiedAgentPanel({ assets, agents, portfolio, autoTradeEnabled,
       return
     }
     onToggleAutoTrade(checked)
-    toast.success(checked ? 'Auto-trading enabled - agents will scan every 90 seconds' : 'Auto-trading disabled')
+    toast.success(checked ? 'Auto-trading enabled - agents will scan every 60 seconds' : 'Auto-trading disabled')
   }
 
   const handleAnalyze = async () => {
@@ -138,16 +138,16 @@ export function UnifiedAgentPanel({ assets, agents, portfolio, autoTradeEnabled,
                 Auto-Trading Mode Active
               </div>
               <p className="text-sm text-muted-foreground">
-                Unified agents automatically scan top assets every 90 seconds. Trades are executed when all agents reach 85%+ confidence consensus.
+                Unified agents automatically scan top assets every 60 seconds. Trades are executed when all agents reach 70%+ confidence consensus.
               </p>
               <div className="grid grid-cols-3 gap-3 mt-3 text-xs">
                 <div className="bg-background rounded p-2">
                   <div className="text-muted-foreground">Safety Threshold</div>
-                  <div className="font-medium">85% Confidence</div>
+                  <div className="font-medium">70% Confidence</div>
                 </div>
                 <div className="bg-background rounded p-2">
                   <div className="text-muted-foreground">Scan Interval</div>
-                  <div className="font-medium">90 seconds</div>
+                  <div className="font-medium">60 seconds</div>
                 </div>
                 <div className="bg-background rounded p-2">
                   <div className="text-muted-foreground">Max Drawdown</div>
