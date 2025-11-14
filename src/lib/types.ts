@@ -63,7 +63,7 @@ export interface Forecast {
 
 export type TradingMode = 'conservative' | 'moderate' | 'aggressive'
 export type AgentType = 'single' | 'multi'
-export type AIModel = 'gpt-4o' | 'gpt-4o-mini' | 'deepseek' | 'qwen'
+export type AIModel = 'gpt-4o' | 'gpt-4o-mini' | 'gemini' | 'deepseek' | 'qwen'
 
 export interface TradingSignal {
   action: 'buy' | 'sell' | 'hold' | 'close'

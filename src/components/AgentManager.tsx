@@ -124,6 +124,7 @@ export function AgentManager({
                     <SelectContent>
                       <SelectItem value="gpt-4o">GPT-4o (Advanced)</SelectItem>
                       <SelectItem value="gpt-4o-mini">GPT-4o Mini (Fast)</SelectItem>
+                      <SelectItem value="gemini">Gemini (Multi-Modal)</SelectItem>
                       <SelectItem value="deepseek">DeepSeek (Technical)</SelectItem>
                       <SelectItem value="qwen">Qwen (Crowd Analysis)</SelectItem>
                     </SelectContent>

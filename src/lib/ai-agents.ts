@@ -247,6 +247,7 @@ function getModelName(model: AIModel): 'gpt-4o' | 'gpt-4o-mini' {
   switch (model) {
     case 'gpt-4o':
       return 'gpt-4o'
+    case 'gemini':
     case 'gpt-4o-mini':
     case 'deepseek':
     case 'qwen':
