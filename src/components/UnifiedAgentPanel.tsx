@@ -6,9 +6,10 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Separator } from '@/components/ui/separator'
 import { Progress } from '@/components/ui/progress'
 import { Switch } from '@/components/ui/switch'
+import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Asset, AgentConfig, Portfolio } from '@/lib/types'
 import { getUnifiedAgentDecision, UnifiedAgentDecision } from '@/lib/unified-agent'
-import { Robot, CheckCircle, Warning, Clock, TrendUp, TrendDown, Minus, Lightning, Play, Stop, ChartLine } from '@phosphor-icons/react'
+import { Robot, CheckCircle, Warning, Clock, TrendUp, TrendDown, Minus, Lightning, Play, Stop, ChartLine, Info } from '@phosphor-icons/react'
 import { toast } from 'sonner'
 
 interface UnifiedAgentPanelProps {
@@ -98,6 +99,15 @@ export function UnifiedAgentPanel({ assets, agents, portfolio, autoTradeEnabled,
 
   return (
     <div className="space-y-6">
+      {enabledAgents.length === 0 && (
+        <Alert className="bg-primary/5 border-primary/20">
+          <Info size={16} className="text-primary" />
+          <AlertDescription className="text-xs">
+            <strong className="font-semibold">Setup Required:</strong> Enable at least one AI agent (in the Agents tab) and configure API keys to begin trading. Current demo keys are void and will not work.
+          </AlertDescription>
+        </Alert>
+      )}
+      
       <Card className={autoTradeEnabled ? 'border-accent shadow-lg' : ''}>
         <CardHeader>
           <div className="flex items-center justify-between">

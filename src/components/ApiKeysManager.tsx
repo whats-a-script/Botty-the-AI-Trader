@@ -293,6 +293,13 @@ export function ApiKeysManager() {
         </p>
       </div>
 
+      <Alert className="bg-[oklch(0.75_0.15_60)]/10 border-[oklch(0.75_0.15_60)]/30">
+        <WarningCircle size={16} className="text-[oklch(0.70_0.15_60)]" />
+        <AlertDescription className="text-xs">
+          <strong className="font-semibold">Important:</strong> You must enter your own API keys below. Any pre-existing keys are void and will not work. Get your API keys from the respective provider websites using the "Get Key" links.
+        </AlertDescription>
+      </Alert>
+
       <Alert>
         <Key size={16} />
         <AlertDescription className="text-xs">

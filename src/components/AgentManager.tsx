@@ -8,7 +8,8 @@ import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Input } from '@/components/ui/input'
 import { Slider } from '@/components/ui/slider'
-import { Robot, Play, Pause, Trash, TrendUp, TrendDown, Lightning, Clock, ChartLine } from '@phosphor-icons/react'
+import { Alert, AlertDescription } from '@/components/ui/alert'
+import { Robot, Play, Pause, Trash, TrendUp, TrendDown, Lightning, Clock, ChartLine, Info } from '@phosphor-icons/react'
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
 
 interface AgentManagerProps {
@@ -81,6 +82,13 @@ export function AgentManager({
 
   return (
     <div className="space-y-6">
+      <Alert className="bg-primary/5 border-primary/20">
+        <Info size={16} className="text-primary" />
+        <AlertDescription className="text-xs">
+          <strong className="font-semibold">Note:</strong> AI agents require valid API keys to function. Any pre-configured keys are void and must be replaced with your own keys from the respective AI providers (OpenAI, Google, etc.).
+        </AlertDescription>
+      </Alert>
+      
       <div className="flex items-center justify-between">
         <div>
           <h2 className="text-2xl font-bold">AI Trading Agents</h2>
