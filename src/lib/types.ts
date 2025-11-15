@@ -192,3 +192,30 @@ export interface NotificationConfig {
   onDrawdownAlert: boolean
   drawdownThreshold: number
 }
+
+export type ApiProvider = 'anthropic' | 'gemini' | 'deepseek' | 'qwen' | 'coinbase' | 'binance' | 'kraken' | 'alpaca'
+export type ApiCategory = 'ai' | 'trading'
+
+export interface ApiKeys {
+  anthropic?: string
+  gemini?: string
+  deepseek?: string
+  qwen?: string
+  coinbase?: string
+  coinbaseSecret?: string
+  binance?: string
+  binanceSecret?: string
+  kraken?: string
+  krakenSecret?: string
+  alpaca?: string
+  alpacaSecret?: string
+}
+
+export interface ApiKeyConfig {
+  provider: ApiProvider
+  displayName: string
+  description: string
+  category: ApiCategory
+  requiresSecret?: boolean
+  docsUrl?: string
+}

@@ -1,17 +1,22 @@
 import { useState } from 'react'
-import { Button } from '@/components/ui/but
-import { Tabs, TabsContent, TabsList, TabsTrigg
-import { Input } from '@/components/ui/input'
+import { useKV } from '@github/spark/hooks'
+import { Button } from '@/components/ui/button'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { Label } from '@/components/ui/label'
 import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { ApiKeys, ApiKeyConfig } from '@/lib/ty
+import { Badge } from '@/components/ui/badge'
+import { Switch } from '@/components/ui/switch'
+import { ApiKeys, ApiKeyConfig } from '@/lib/types'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Eye, EyeSlash, CheckCircle, WarningCircle, Link, Key, Robot, Coin } from '@phosphor-icons/react'
 import { toast } from 'sonner'
-import { ApiKeys, ApiKeyConfig } from '@/lib/types'
 
+const API_CONFIGS: ApiKeyConfig[] = [
+  {
+    provider: 'anthropic',
+    displayName: 'Anthropic Claude',
+    description: 'Claude for advanced reasoning and analysis',
     category: 'ai',
     docsUrl: 'https://console.anthropic.com/settings/keys'
   },

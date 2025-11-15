@@ -29,7 +29,7 @@ export function useApiKeys() {
   }
 
   const getEnabledAIProviders = (): ApiProvider[] => {
-    const aiProviders: ApiProvider[] = ['openai', 'anthropic', 'gemini', 'deepseek', 'qwen']
+    const aiProviders: ApiProvider[] = ['anthropic', 'gemini', 'deepseek', 'qwen']
     return aiProviders.filter(p => isProviderEnabled(p) && isProviderConfigured(p))
   }
 
